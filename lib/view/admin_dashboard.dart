@@ -9,6 +9,7 @@ import '../widgets/branches_performance_widget.dart';
 import '../widgets/recent_behaviours_widget.dart';
 import 'staff_screen.dart';
 import 'report_screen.dart';
+import 'user_settings_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   final String userRole;
@@ -99,6 +100,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
           _currentIndex = 0;
         });
       });
+    } else if (index == 3) { // Users tab
+      setState(() {
+        _currentIndex = index;
+      });
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => UserSettingsScreen(userRole: widget.userRole),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+      );
     } else {
       setState(() {
         _currentIndex = index;

@@ -4,6 +4,8 @@ import '../widgets/bottom_bar.dart';
 import 'staff_screen.dart';
 import 'admin_dashboard.dart';
 import 'detailed_report_screen.dart';
+import 'user_settings_screen.dart';
+import 'analytics_screen.dart';
 
 class ReportScreen extends StatefulWidget {
   final String userRole;
@@ -39,9 +41,13 @@ class _ReportScreenState extends State<ReportScreen> {
         ),
       );
     } else if (index == 3) { // Users tab
-      // TODO: Navigate to Users screen when implemented
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Users screen not yet implemented')),
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => UserSettingsScreen(userRole: widget.userRole),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
       );
     }
   }
@@ -97,7 +103,12 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
               child: TextButton.icon(
                 onPressed: () {
-                  // Handle view analytics
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AnalyticsScreen(userRole: widget.userRole),
+                    ),
+                  );
                 },
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

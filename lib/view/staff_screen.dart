@@ -4,6 +4,7 @@ import '../widgets/bottom_bar.dart';
 import 'employee_profile_screen.dart';
 import 'report_screen.dart';
 import 'admin_dashboard.dart';
+import 'user_settings_screen.dart';
 
 class StaffScreen extends StatefulWidget {
   final String userRole;
@@ -42,7 +43,6 @@ class _StaffScreenState extends State<StaffScreen> {
 
   void _onItemTapped(int index) {
     if (index == 0) { // Dashboard tab
-      // Navigate back to dashboard by replacing current screen
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
@@ -61,9 +61,13 @@ class _StaffScreenState extends State<StaffScreen> {
         ),
       );
     } else if (index == 3) { // Users tab
-      // TODO: Navigate to Users screen when implemented
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Users screen not yet implemented')),
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => UserSettingsScreen(userRole: widget.userRole),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
       );
     }
   }
