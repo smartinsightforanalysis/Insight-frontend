@@ -4,11 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 class BottomBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final String userRole;
 
   const BottomBar({
     Key? key,
     required this.currentIndex,
     required this.onTap,
+    required this.userRole,
   }) : super(key: key);
 
   @override
@@ -46,7 +48,11 @@ class BottomBar extends StatelessWidget {
                   _buildNavItem('assets/home.svg', 'Dashboard', 0),
                   _buildNavItem('assets/report.svg', 'Reports', 1),
                   _buildNavItem('assets/staff.svg', 'Staff', 2),
-                  _buildNavItem('assets/users.svg', 'Users', 3),
+                  _buildNavItem(
+                    'assets/users.svg',
+                    userRole.toLowerCase() == 'admin' ? 'Users' : 'Settings',
+                    3,
+                  ),
                 ],
               ),
             ),

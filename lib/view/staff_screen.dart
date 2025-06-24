@@ -336,6 +336,7 @@ class _StaffScreenState extends State<StaffScreen> {
       bottomNavigationBar: BottomBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
+        userRole: widget.userRole,
       ),
     );
   }

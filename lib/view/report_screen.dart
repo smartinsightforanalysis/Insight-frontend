@@ -192,6 +192,7 @@ class _ReportScreenState extends State<ReportScreen> {
       bottomNavigationBar: BottomBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
+        userRole: widget.userRole,
       ),
     );
   }

@@ -83,6 +83,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
       bottomNavigationBar: BottomBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
+        userRole: widget.userRole,
       ),
     );
   }

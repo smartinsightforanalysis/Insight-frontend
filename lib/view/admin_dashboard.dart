@@ -607,6 +607,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       bottomNavigationBar: BottomBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
+        userRole: widget.userRole,
       ),
       floatingActionButton: _showExportButton
           ? FloatingActionButton.extended(
