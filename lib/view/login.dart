@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:insight/services/api_service.dart';
 import '../widgets/forgot_password_modal.dart';
 import '../widgets/save_info_modal.dart';
 import 'onboarding_screen.dart';
@@ -14,24 +15,60 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final ApiService _apiService = ApiService();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   bool _isPasswordVisible = false;
   String? _selectedRole;
 
+  // Error state variables
+  String? _roleError;
+  String? _emailError;
+  String? _passwordError;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _navigateToDashboard() {
     if (_selectedRole == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a role')),
-      );
+      setState(() {
+        _roleError = 'Please select a role';
+      });
       return;
     }
-
-    // All roles now go to AdminDashboard with the selected role passed as parameter
     final dashboard = AdminDashboard(userRole: _selectedRole!);
-
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => dashboard),
     );
+  }
+
+  Future<void> _handleLogin() async {
+    setState(() {
+      _roleError = _selectedRole == null ? 'Please select a role' : null;
+      _emailError = _emailController.text.isEmpty ? 'Please enter your email' : null;
+      _passwordError = _passwordController.text.isEmpty ? 'Please enter your password' : null;
+    });
+    if (_roleError != null || _emailError != null || _passwordError != null) {
+      return;
+    }
+    try {
+      await _apiService.loginUser(
+        _emailController.text,
+        _passwordController.text,
+        _selectedRole!,
+      );
+      _navigateToDashboard();
+    } catch (e) {
+      setState(() {
+        _passwordError = 'Failed to login: $e';
+      });
+    }
   }
 
   @override
@@ -117,9 +154,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       onChanged: (String? newValue) {
                         setState(() {
                           _selectedRole = newValue;
+                          _roleError = null;
                         });
                       },
                     ),
+                    if (_roleError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0, bottom: 8.0),
+                        child: Text(_roleError!, style: const TextStyle(color: Colors.red, fontSize: 14)),
+                      ),
                     const SizedBox(height: 24),
                     const Text(
                       'Email',
@@ -127,6 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
+                      controller: _emailController,
                       decoration: InputDecoration(
                         hintText: 'Enter your email',
                         hintStyle: TextStyle(color: Color(0xFFADAEBC)),
@@ -147,7 +191,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         fillColor: Colors.white,
                       ),
                       keyboardType: TextInputType.emailAddress,
+                      onChanged: (_) {
+                        if (_emailError != null) setState(() => _emailError = null);
+                      },
                     ),
+                    if (_emailError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0, bottom: 8.0),
+                        child: Text(_emailError!, style: const TextStyle(color: Colors.red, fontSize: 14)),
+                      ),
                     const SizedBox(height: 24),
                     const Text(
                       'Password',
@@ -155,6 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
+                      controller: _passwordController,
                       decoration: InputDecoration(
                         hintText: 'Enter your password',
                         hintStyle: TextStyle(color: Color(0xFFADAEBC)),
@@ -194,7 +247,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         fillColor: Colors.white,
                       ),
                       obscureText: !_isPasswordVisible,
+                      onChanged: (_) {
+                        if (_passwordError != null) setState(() => _passwordError = null);
+                      },
                     ),
+                    if (_passwordError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0, bottom: 8.0),
+                        child: Text(_passwordError!, style: const TextStyle(color: Colors.red, fontSize: 14)),
+                      ),
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
@@ -210,10 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () {
-                        // TODO: Implement login logic
-                        _navigateToDashboard();
-                      },
+                      onPressed: _handleLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF209A9F),
                         padding: const EdgeInsets.symmetric(vertical: 16.0),

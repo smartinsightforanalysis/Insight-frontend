@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insight/services/api_service.dart';
 import 'package:insight/widgets/verify_email_modal.dart';
 
 class ForgotPasswordModal extends StatefulWidget {
@@ -9,6 +10,7 @@ class ForgotPasswordModal extends StatefulWidget {
 }
 
 class _ForgotPasswordModalState extends State<ForgotPasswordModal> {
+  final ApiService _apiService = ApiService();
   final TextEditingController _emailController = TextEditingController();
 
   @override
@@ -20,6 +22,25 @@ class _ForgotPasswordModalState extends State<ForgotPasswordModal> {
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleForgotPassword() async {
+    try {
+      await _apiService.sendOtp(_emailController.text);
+      Navigator.of(context).pop();
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => VerifyEmailModal(
+          email: _emailController.text,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send OTP: $e')),
+      );
+    }
   }
 
   @override
@@ -69,7 +90,7 @@ class _ForgotPasswordModalState extends State<ForgotPasswordModal> {
             
             // Subtitle
             const Text(
-              'Enter the 4-digit code sent to your email',
+              'Enter your email to receive an OTP',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
@@ -109,14 +130,7 @@ class _ForgotPasswordModalState extends State<ForgotPasswordModal> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement forgot password logic
-                  // Close the current modal
-                  Navigator.of(context).pop();
-
-                  // Show the Verify Email modal
-                  showModalBottomSheet(context: context, builder: (context) => const VerifyEmailModal());
-                },
+                onPressed: _handleForgotPassword,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF209A9F),
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -142,3 +156,4 @@ class _ForgotPasswordModalState extends State<ForgotPasswordModal> {
     );
   }
 }
+

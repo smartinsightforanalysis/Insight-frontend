@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insight/services/api_service.dart';
 import 'package:insight/view/forget_password.dart';
 import 'package:insight/view/admin_dashboard.dart';
 
@@ -6,12 +7,18 @@ class VerifyEmailModal extends StatefulWidget {
   final Widget? nextScreen;
   final bool isSignupContext;
   final String? selectedRole;
+  final String? email;
+  final String? name;
+  final String? password;
 
   const VerifyEmailModal({
-    Key? key, 
-    this.nextScreen, 
+    Key? key,
+    this.nextScreen,
     this.isSignupContext = false,
     this.selectedRole,
+    this.email,
+    this.name,
+    this.password,
   }) : super(key: key);
 
   @override
@@ -19,11 +26,13 @@ class VerifyEmailModal extends StatefulWidget {
 }
 
 class _VerifyEmailModalState extends State<VerifyEmailModal> {
-  // Controllers for the four digit inputs
+  final ApiService _apiService = ApiService();
   final TextEditingController _field1Controller = TextEditingController();
   final TextEditingController _field2Controller = TextEditingController();
   final TextEditingController _field3Controller = TextEditingController();
   final TextEditingController _field4Controller = TextEditingController();
+
+  String? _otpError;
 
   @override
   void dispose() {
@@ -42,13 +51,37 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
       return;
     }
 
-    // All roles now go to AdminDashboard with the selected role passed as parameter
     final dashboard = AdminDashboard(userRole: widget.selectedRole!);
 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => dashboard),
     );
+  }
+
+  Future<void> _handleVerifyOtp() async {
+    final otp = _field1Controller.text + _field2Controller.text + _field3Controller.text + _field4Controller.text;
+    if (otp.length != 4) {
+      setState(() {
+        _otpError = 'Please enter the complete OTP';
+      });
+      return;
+    }
+
+    try {
+      if (widget.isSignupContext) {
+        await _apiService.verifyOTPAndRegister(widget.email!, otp, widget.name!, widget.password!, widget.selectedRole!);
+        _navigateToDashboard();
+      } else {
+        await _apiService.verifyOtp(widget.email!, otp);
+        Navigator.of(context).pop();
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => ForgetPasswordScreen(email: widget.email!)));
+      }
+    } catch (e) {
+      setState(() {
+        _otpError = "Invalid OTP";
+      });
+    }
   }
 
   @override
@@ -117,21 +150,28 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
                 _buildCodeInputField(_field4Controller),
               ],
             ),
+            // Show error message below OTP fields
+            if (_otpError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Center(
+                  child: Text(
+                    _otpError!,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ),
             const SizedBox(height: 32),
 
             // Continue button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement verification logic
-                  Navigator.of(context).pop();
-                  if (widget.isSignupContext) {
-                    _navigateToDashboard();
-                  } else if (widget.nextScreen != null) {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => widget.nextScreen!));
-                  }
-                },
+                onPressed: _handleVerifyOtp,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF209A9F),
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -203,6 +243,11 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
         onChanged: (value) {
+          if (_otpError != null) {
+            setState(() {
+              _otpError = null;
+            });
+          }
           if (value.length == 1) {
             FocusScope.of(context).nextFocus();
           }
@@ -210,4 +255,6 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
       ),
     );
   }
-} 
+}
+
+ 
