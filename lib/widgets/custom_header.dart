@@ -9,6 +9,8 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
   final double height;
   final Color backgroundColor;
   final double borderRadius;
+  final String? currentBranchId;
+  final Function(Map<String, dynamic>)? onBranchChanged;
 
   const CustomHeader({
     Key? key,
@@ -18,6 +20,8 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
     this.height = 110,
     this.backgroundColor = const Color(0xFF209A9F),
     this.borderRadius = 21,
+    this.currentBranchId,
+    this.onBranchChanged,
   }) : super(key: key);
 
   @override
@@ -74,7 +78,10 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                     context: context,
                     isScrollControlled: true,
                     builder: (BuildContext context) {
-                      return const BranchSwitchPopup();
+                      return BranchSwitchPopup(
+                        currentBranchId: currentBranchId,
+                        onBranchSelected: onBranchChanged,
+                      );
                     },
                   );
                 },

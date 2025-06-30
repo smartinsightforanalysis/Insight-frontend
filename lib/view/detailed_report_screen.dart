@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../widgets/report_period_tabs.dart';
 import '../widgets/report_summary_cards.dart';
+import '../widgets/filter_events_popup.dart';
 import '../widgets/report_incidents_list.dart';
 import '../widgets/export_report_button.dart';
 
@@ -57,18 +58,24 @@ class _DetailedReportScreenState extends State<DetailedReportScreen> {
               'assets/filter.svg',
               width: 16,
               height: 14,
-              colorFilter: const ColorFilter.mode(Color(0xFF4B5563), BlendMode.srcIn),
+              colorFilter: const ColorFilter.mode(
+                Color(0xFF4B5563),
+                BlendMode.srcIn,
+              ),
             ),
             onPressed: () {
-              // Handle filter action
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) =>
+                    FilterEventsPopup(reportTitle: widget.reportTitle),
+              );
             },
           ),
         ],
         shape: const Border(
-          bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
-            width: 1,
-          ),
+          bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
         ),
       ),
       body: SingleChildScrollView(
@@ -79,25 +86,25 @@ class _DetailedReportScreenState extends State<DetailedReportScreen> {
               selectedPeriod: _selectedPeriod,
               onPeriodChanged: _onPeriodChanged,
             ),
-            
+
             // Summary Cards
             ReportSummaryCards(
               selectedPeriod: _selectedPeriod,
               reportType: widget.reportTitle,
             ),
-            
+
             // Incidents List
             ReportIncidentsList(
               selectedPeriod: _selectedPeriod,
               reportType: widget.reportTitle,
             ),
-            
+
             // Export Button
             ExportReportButton(
               userRole: widget.userRole,
               reportType: widget.reportTitle,
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),

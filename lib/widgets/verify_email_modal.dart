@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:insight/services/api_service.dart';
 import 'package:insight/view/forget_password.dart';
 import 'package:insight/view/admin_dashboard.dart';
+import 'package:insight/view/login.dart';
 
 class VerifyEmailModal extends StatefulWidget {
   final Widget? nextScreen;
@@ -10,6 +11,7 @@ class VerifyEmailModal extends StatefulWidget {
   final String? email;
   final String? name;
   final String? password;
+  final String? phoneNumber; // Added phoneNumber
 
   const VerifyEmailModal({
     Key? key,
@@ -19,6 +21,7 @@ class VerifyEmailModal extends StatefulWidget {
     this.email,
     this.name,
     this.password,
+    this.phoneNumber, // Added phoneNumber to constructor
   }) : super(key: key);
 
   @override
@@ -45,9 +48,9 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
 
   void _navigateToDashboard() {
     if (widget.selectedRole == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a role')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a role')));
       return;
     }
 
@@ -59,8 +62,32 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
     );
   }
 
+  void _showSuccessAndNavigateToLogin() {
+    // Close the modal first
+    Navigator.of(context).pop();
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Signup successful! Please log in.'),
+        backgroundColor: Color(0xFF209A9F),
+        duration: Duration(seconds: 3),
+      ),
+    );
+
+    // Navigate to login screen, clearing all previous routes
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   Future<void> _handleVerifyOtp() async {
-    final otp = _field1Controller.text + _field2Controller.text + _field3Controller.text + _field4Controller.text;
+    final otp =
+        _field1Controller.text +
+        _field2Controller.text +
+        _field3Controller.text +
+        _field4Controller.text;
     if (otp.length != 4) {
       setState(() {
         _otpError = 'Please enter the complete OTP';
@@ -70,16 +97,44 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
 
     try {
       if (widget.isSignupContext) {
-        await _apiService.verifyOTPAndRegister(widget.email!, otp, widget.name!, widget.password!, widget.selectedRole!);
-        _navigateToDashboard();
+        await _apiService.verifyOTPAndRegister(
+          widget.email!,
+          otp,
+          widget.name!,
+          widget.password!,
+          widget.selectedRole!,
+          widget.phoneNumber, // Now optional, can be null
+        );
+        _showSuccessAndNavigateToLogin();
       } else {
         await _apiService.verifyOtp(widget.email!, otp);
         Navigator.of(context).pop();
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => ForgetPasswordScreen(email: widget.email!)));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ForgetPasswordScreen(email: widget.email!),
+          ),
+        );
       }
     } catch (e) {
       setState(() {
-        _otpError = "Invalid OTP";
+        // Show the actual error message from the backend
+        String errorMessage = e.toString();
+        String userFriendlyMessage = "Invalid OTP"; // Default message
+
+        if (errorMessage.contains('HTTP 400: Bad Request')) {
+          userFriendlyMessage = "Invalid OTP. Please try again.";
+        } else if (errorMessage.contains('Network')) {
+          userFriendlyMessage =
+              "Network error. Please check your internet connection.";
+        } else if (errorMessage.startsWith('Exception: ')) {
+          errorMessage = errorMessage.substring(
+            11,
+          ); // Remove "Exception: " prefix
+          userFriendlyMessage = errorMessage.isNotEmpty
+              ? errorMessage
+              : "Invalid OTP. Please try again.";
+        }
+        _otpError = userFriendlyMessage;
       });
     }
   }
@@ -108,7 +163,9 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
             // Handle bar
             Center(
               child: Container(
-                width: MediaQuery.of(context).size.width * 0.3, // 60% of screen width (approx modal width)
+                width:
+                    MediaQuery.of(context).size.width *
+                    0.3, // 60% of screen width (approx modal width)
                 height: 4,
                 decoration: BoxDecoration(
                   color: Colors.black, // Changed color to black
@@ -256,5 +313,3 @@ class _VerifyEmailModalState extends State<VerifyEmailModal> {
     );
   }
 }
-
- 

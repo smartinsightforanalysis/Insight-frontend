@@ -1,14 +1,101 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../services/api_service.dart';
 
 class BranchSwitchPopup extends StatefulWidget {
-  const BranchSwitchPopup({Key? key}) : super(key: key);
+  final String? currentBranchId;
+  final Function(Map<String, dynamic>)? onBranchSelected;
+  
+  const BranchSwitchPopup({
+    Key? key,
+    this.currentBranchId,
+    this.onBranchSelected,
+  }) : super(key: key);
 
   @override
   State<BranchSwitchPopup> createState() => _BranchSwitchPopupState();
 }
 
 class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
+  final ApiService _apiService = ApiService();
+  final TextEditingController _searchController = TextEditingController();
+  
+  List<Map<String, dynamic>> _branches = [];
+  List<Map<String, dynamic>> _filteredBranches = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+  String? _selectedBranchId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedBranchId = widget.currentBranchId;
+    _loadBranches();
+    _searchController.addListener(_filterBranches);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadBranches() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await _apiService.getAllBranches();
+      setState(() {
+        _branches = List<Map<String, dynamic>>.from(response['branches'] ?? []);
+        _filteredBranches = List.from(_branches);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _filterBranches() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredBranches = List.from(_branches);
+      } else {
+        _filteredBranches = _branches.where((branch) {
+          final name = (branch['branchName'] ?? '').toLowerCase();
+          final address = (branch['branchAddress'] ?? '').toLowerCase();
+          return name.contains(query) || address.contains(query);
+        }).toList();
+      }
+    });
+  }
+
+  void _selectBranch(Map<String, dynamic> branch) {
+    setState(() {
+      _selectedBranchId = branch['id'] ?? branch['_id'];
+    });
+  }
+
+  void _switchBranch() {
+    if (_selectedBranchId != null) {
+      final selectedBranch = _branches.firstWhere(
+        (branch) => (branch['id'] ?? branch['_id']) == _selectedBranchId,
+        orElse: () => {},
+      );
+      
+      if (selectedBranch.isNotEmpty && widget.onBranchSelected != null) {
+        widget.onBranchSelected!(selectedBranch);
+      }
+      
+      Navigator.pop(context, selectedBranch.isNotEmpty ? selectedBranch : null);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -59,8 +146,9 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Branch',
+                    hintText: 'Search branches...',
                     hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
                     prefixIcon: Container(
                       width: 20,
@@ -88,13 +176,95 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView(
-              children: [
-                _buildBranchItem(context, 'Main Branch', 'Near xyz location, UAE'),
-                _buildBranchItem(context, 'Main Branch', 'Near xyz location, UAE'),
-                // Add more branch items as needed
-              ],
-            ),
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF209A9F),
+                    ),
+                  )
+                : _errorMessage != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Error: $_errorMessage',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _loadBranches,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF209A9F),
+                              ),
+                              child: const Text(
+                                'Retry',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _filteredBranches.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.business_outlined,
+                                  size: 48,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _searchController.text.isNotEmpty
+                                      ? 'No branches found'
+                                      : 'No branches available',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                if (_searchController.text.isNotEmpty)
+                                  const SizedBox(height: 8),
+                                if (_searchController.text.isNotEmpty)
+                                  const Text(
+                                    'Try a different search term',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _filteredBranches.length,
+                            itemBuilder: (context, index) {
+                              final branch = _filteredBranches[index];
+                              final branchId = branch['id'] ?? branch['_id'];
+                              final isSelected = _selectedBranchId == branchId;
+                              
+                              return _buildBranchItem(
+                                context,
+                                branch['branchName'] ?? 'Unknown Branch',
+                                branch['branchAddress'] ?? 'Unknown Address',
+                                isSelected,
+                                () => _selectBranch(branch),
+                              );
+                            },
+                          ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -102,9 +272,7 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle switch branch logic
-                },
+                onPressed: _selectedBranchId != null ? _switchBranch : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF209A9F),
                   shape: RoundedRectangleBorder(
@@ -123,13 +291,25 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
     );
   }
 
-  Widget _buildBranchItem(BuildContext context, String name, String location) {
+  Widget _buildBranchItem(
+    BuildContext context,
+    String name,
+    String location,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return InkWell(
-      onTap: () {
-        // Handle branch selection
-      },
-      child: Padding(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF209A9F).withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8.0),
+          border: isSelected
+              ? Border.all(color: const Color(0xFF209A9F), width: 1.5)
+              : null,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -139,8 +319,8 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                 'assets/branch.svg', // Assuming you have a branch SVG icon
                 width: 17,
                 height: 16,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF209A9F), // Teal color for the icon
+                colorFilter: ColorFilter.mode(
+                  isSelected ? const Color(0xFF209A9F) : const Color(0xFF9CA3AF),
                   BlendMode.srcIn,
                 ),
               ),
@@ -152,10 +332,10 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
+                      color: isSelected ? const Color(0xFF209A9F) : const Color(0xFF333333),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -169,6 +349,12 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                 ],
               ),
             ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle,
+                color: Color(0xFF209A9F),
+                size: 20,
+              ),
           ],
         ),
       ),

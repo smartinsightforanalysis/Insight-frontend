@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:insight/view/download_progress_screen.dart';
 
 class DownloadReportWidget extends StatefulWidget {
   const DownloadReportWidget({Key? key}) : super(key: key);
@@ -42,23 +43,17 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
           const SizedBox(height: 4),
           const Text(
             'Export the detailed report in PDF format',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF4B5563),
-            ),
+            style: TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
           ),
           const SizedBox(height: 16),
-          
+
           // Include Analytics Toggle
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Include AI Insights',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.black),
               ),
               Switch(
                 value: _includeAnalytics,
@@ -75,17 +70,14 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
               ),
             ],
           ),
-          
+
           // Include Snapshots Toggle
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Include Snapshots',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.black),
               ),
               Switch(
                 value: _includeSnapshots,
@@ -103,17 +95,15 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Download Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // Handle download action
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Downloading Employee Summary...'),
-                    backgroundColor: Color(0xFF16A3AC),
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const DownloadProgressScreen(),
                   ),
                 );
               },
@@ -133,15 +123,15 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
                     'assets/pdf.svg',
                     width: 20,
                     height: 20,
-                    colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    colorFilter: ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   const Text(
                     'Download Employee Summary',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),

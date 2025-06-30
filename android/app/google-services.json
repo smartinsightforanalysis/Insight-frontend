@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "936396794093",
+    "project_id": "insight-608e0",
+    "storage_bucket": "insight-608e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936396794093:android:8828204b2c3a08ab2944e4",
+        "android_client_info": {
+          "package_name": "com.example.insight"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936396794093-j9mjruucpofsbllleh541gke23btcl33.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.insight",
+            "certificate_hash": "4b871bb5f3a8d07cd610644b8bf014f9030ff278"
+          }
+        },
+        {
+          "client_id": "936396794093-bkkme55shejfgj8naejec84j14jtqm5l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgje4LQ3Pnu8aAB-qkY7jDWsC7kAfdKCg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936396794093-bkkme55shejfgj8naejec84j14jtqm5l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insight/widgets/export_report_dialog.dart';
 
 class ExportReportButton extends StatelessWidget {
   final String userRole;
@@ -33,71 +34,21 @@ class ExportReportButton extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        icon: const Icon(
-          Icons.download,
-          size: 20,
-        ),
+        icon: const Icon(Icons.download, size: 20),
         label: const Text(
           'Export All Reports',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
 
   void _handleExportReport(BuildContext context) {
-    // Show confirmation dialog
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Export Report'),
-          content: Text('Export $reportType data as PDF or Excel?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _exportAsPDF(context);
-              },
-              child: const Text('PDF'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _exportAsExcel(context);
-              },
-              child: const Text('Excel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _exportAsPDF(BuildContext context) {
-    // TODO: Implement PDF export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Exporting as PDF...'),
-        backgroundColor: Color(0xFF209A9F),
-      ),
-    );
-  }
-
-  void _exportAsExcel(BuildContext context) {
-    // TODO: Implement Excel export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Exporting as Excel...'),
-        backgroundColor: Color(0xFF209A9F),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ExportReportDialog(reportType: reportType),
     );
   }
 }

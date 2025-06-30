@@ -1,8 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:insight/view/add_new_branch_screen.dart';
+import '../services/api_service.dart';
 
-class ManageBranchScreen extends StatelessWidget {
+class ManageBranchScreen extends StatefulWidget {
   const ManageBranchScreen({super.key});
+
+  @override
+  State<ManageBranchScreen> createState() => _ManageBranchScreenState();
+}
+
+class _ManageBranchScreenState extends State<ManageBranchScreen> {
+  final ApiService _apiService = ApiService();
+  List<Map<String, dynamic>> _branches = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBranches();
+  }
+
+  Future<void> _loadBranches() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await _apiService.getAllBranches();
+      setState(() {
+        _branches = List<Map<String, dynamic>>.from(response['branches'] ?? []);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _navigateToAddBranch() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddNewBranchScreen(),
+      ),
+    );
+
+    // If a branch was successfully added, refresh the list
+    if (result == true) {
+      _loadBranches();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,34 +73,100 @@ class ManageBranchScreen extends StatelessWidget {
         centerTitle: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.grey.shade200,
-            height: 1.0,
-          ),
+          child: Container(color: Colors.grey.shade200, height: 1.0),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: const [
-            BranchCard(
-              name: 'ABC',
-              location: 'Near xyz location, UAE',
-            ),
-          ],
-        ),
+        child: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF209A9F),
+                ),
+              )
+            : _errorMessage != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error: $_errorMessage',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadBranches,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF209A9F),
+                          ),
+                          child: const Text(
+                            'Retry',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : _branches.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.business_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'No branches found',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Add your first branch to get started',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadBranches,
+                        color: const Color(0xFF209A9F),
+                        child: ListView.separated(
+                          itemCount: _branches.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final branch = _branches[index];
+                            return BranchCard(
+                              name: branch['branchName'] ?? 'Unknown',
+                              location: branch['branchAddress'] ?? 'Unknown Address',
+                            );
+                          },
+                        ),
+                      ),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
         child: ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AddNewBranchScreen(),
-              ),
-            );
-          },
+          onPressed: _navigateToAddBranch,
           icon: const Icon(Icons.add, color: Colors.white, size: 24.0),
           label: const Text(
             'Add New Branch',
@@ -77,11 +194,7 @@ class BranchCard extends StatelessWidget {
   final String name;
   final String location;
 
-  const BranchCard({
-    super.key,
-    required this.name,
-    required this.location,
-  });
+  const BranchCard({super.key, required this.name, required this.location});
 
   @override
   Widget build(BuildContext context) {
@@ -107,10 +220,7 @@ class BranchCard extends StatelessWidget {
                 const SizedBox(height: 8.0),
                 Text(
                   location,
-                  style: const TextStyle(
-                    fontSize: 14.0,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 14.0, color: Colors.grey),
                 ),
               ],
             ),
@@ -125,4 +235,4 @@ class BranchCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

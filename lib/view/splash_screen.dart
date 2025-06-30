@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'onboarding_screen.dart';
+import '../services/user_session.dart';
+import 'admin_dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   final Widget? nextScreen;
@@ -15,12 +17,45 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Navigate to onboarding screen after 3 seconds
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
-    });
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Wait for minimum splash duration
+    await Future.delayed(const Duration(seconds: 2));
+    
+    try {
+      // Try to load existing user session
+      final userSession = UserSession.instance;
+      final isLoggedIn = await userSession.loadUserSession();
+      
+      print('Splash - Session loaded: $isLoggedIn');
+      print('Splash - User role: ${userSession.userRole}');
+      print('Splash - User data: ${userSession.currentUser}');
+      
+      if (mounted) {
+        if (isLoggedIn && userSession.userRole != null) {
+          // User is logged in, navigate to dashboard
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => AdminDashboard(userRole: userSession.userRole!),
+            ),
+          );
+        } else {
+          // User not logged in, navigate to onboarding
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error initializing app: $e');
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+        );
+      }
+    }
   }
 
   @override

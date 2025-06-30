@@ -38,11 +38,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 8,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    AnalyticsTabs(selectedIndex: _selectedTab, onTabSelected: (i) => setState(() => _selectedTab = i)),
+                    AnalyticsTabs(
+                      selectedIndex: _selectedTab,
+                      onTabSelected: (i) => setState(() => _selectedTab = i),
+                    ),
                     const SizedBox(height: 16),
                     if (_selectedTab == 0)
                       const _TimeActivityView()
@@ -76,7 +82,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DetailedAnalysisScreen(userRole: widget.userRole),
+                        builder: (context) =>
+                            DetailedAnalysisScreen(userRole: widget.userRole),
                       ),
                     );
                   },
@@ -93,24 +100,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   padding: const EdgeInsets.only(left: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Video Review',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1C3557),
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Captured from security footage',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF6B7280),
-                        ),
-                      ),
-                    ],
+                    children: const [],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -122,7 +112,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 const SizedBox(height: 16),
                 if (widget.userRole.toLowerCase() == 'admin')
                   const DownloadReportWidget(),
-              ]
+              ],
             ],
           ),
         ),
@@ -142,17 +132,20 @@ class _DonutChartPainter extends CustomPainter {
 
     final paints = [
       Paint()
-        ..color = Color(0xFFF97316) // orange
+        ..color =
+            Color(0xFFF97316) // orange
         ..style = PaintingStyle.stroke
         ..strokeWidth = thickness
         ..strokeCap = StrokeCap.butt,
       Paint()
-        ..color = Color(0xFF14B8A6) // teal
+        ..color =
+            Color(0xFF14B8A6) // teal
         ..style = PaintingStyle.stroke
         ..strokeWidth = thickness
         ..strokeCap = StrokeCap.butt,
       Paint()
-        ..color = Color(0xFFFACC15) // yellow
+        ..color =
+            Color(0xFFFACC15) // yellow
         ..style = PaintingStyle.stroke
         ..strokeWidth = thickness
         ..strokeCap = StrokeCap.butt,
@@ -187,10 +180,7 @@ class _LegendItem extends StatelessWidget {
         Container(
           width: 14,
           height: 14,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
         Text(
@@ -234,9 +224,23 @@ class _TimeActivityView extends StatelessWidget {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
-                      Text('Total Events', style: TextStyle(fontSize: 18, color: Color(0xFF737373), fontWeight: FontWeight.w500)),
+                      Text(
+                        'Total Events',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Color(0xFF737373),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       SizedBox(height: 8),
-                      Text('7', style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold, color: Colors.black)),
+                      Text(
+                        '7',
+                        style: TextStyle(
+                          fontSize: 35,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -382,7 +386,12 @@ class _ZoneBgCard extends StatelessWidget {
   final double height;
   final Color color;
   final double borderRadius;
-  const _ZoneBgCard({required this.width, required this.height, required this.color, this.borderRadius = 24});
+  const _ZoneBgCard({
+    required this.width,
+    required this.height,
+    required this.color,
+    this.borderRadius = 24,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -407,7 +416,17 @@ class _ZoneCardStyled extends StatelessWidget {
   final double fontSize;
   final double subtitleFontSize;
   final double subtitleSpace;
-  const _ZoneCardStyled({required this.label, required this.incidents, required this.incidentLabel, required this.width, required this.height, this.shadow = false, this.fontSize = 14, this.subtitleFontSize = 12, this.subtitleSpace = 4});
+  const _ZoneCardStyled({
+    required this.label,
+    required this.incidents,
+    required this.incidentLabel,
+    required this.width,
+    required this.height,
+    this.shadow = false,
+    this.fontSize = 14,
+    this.subtitleFontSize = 12,
+    this.subtitleSpace = 4,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -488,22 +507,28 @@ class _ZoneBreakdownCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Table(
-            columnWidths: const {
-              0: FlexColumnWidth(1),
-              1: FlexColumnWidth(1),
-            },
+            columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(1)},
             children: const [
               TableRow(
                 children: [
                   Padding(
                     padding: EdgeInsets.only(bottom: 12),
-                    child: Text('Time Spent', style: TextStyle(fontSize: 15, color: Color(0xFF6B7280))),
+                    child: Text(
+                      'Time Spent',
+                      style: TextStyle(fontSize: 15, color: Color(0xFF6B7280)),
+                    ),
                   ),
                   Padding(
                     padding: EdgeInsets.only(bottom: 12),
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: Text('Incidents', style: TextStyle(fontSize: 15, color: Color(0xFF6B7280))),
+                      child: Text(
+                        'Incidents',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -512,13 +537,27 @@ class _ZoneBreakdownCard extends StatelessWidget {
                 children: [
                   Padding(
                     padding: EdgeInsets.only(bottom: 16),
-                    child: Text('1 hr 21 min', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black)),
+                    child: Text(
+                      '1 hr 21 min',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: EdgeInsets.only(bottom: 16),
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: Text('3', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black)),
+                      child: Text(
+                        '3',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -527,23 +566,46 @@ class _ZoneBreakdownCard extends StatelessWidget {
                 children: [
                   Padding(
                     padding: EdgeInsets.only(bottom: 12),
-                    child: Text('Behaviour', style: TextStyle(fontSize: 15, color: Color(0xFF6B7280))),
+                    child: Text(
+                      'Behaviour',
+                      style: TextStyle(fontSize: 15, color: Color(0xFF6B7280)),
+                    ),
                   ),
                   Padding(
                     padding: EdgeInsets.only(bottom: 12),
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: Text('Away Time', style: TextStyle(fontSize: 15, color: Color(0xFF6B7280))),
+                      child: Text(
+                        'Away Time',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
               TableRow(
                 children: [
-                  Text('89%', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black)),
+                  Text(
+                    '89%',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: Text('1 time', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black)),
+                    child: Text(
+                      '1 time',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -553,4 +615,4 @@ class _ZoneBreakdownCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

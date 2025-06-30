@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:insight/view/admin_dashboard.dart';
@@ -8,10 +9,13 @@ import 'package:insight/view/report_screen.dart';
 import 'package:insight/view/staff_screen.dart';
 import 'package:insight/widgets/bottom_bar.dart';
 import 'package:insight/view/login.dart';
+import 'package:insight/services/user_session.dart';
+import 'package:insight/services/api_service.dart';
+import 'package:insight/utils/image_utils.dart';
 
 class UserSettingsScreen extends StatefulWidget {
   final String userRole;
-  
+
   const UserSettingsScreen({super.key, required this.userRole});
 
   @override
@@ -93,19 +97,137 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   }
 }
 
-class _UserProfileSection extends StatelessWidget {
+class _UserProfileSection extends StatefulWidget {
   final String userRole;
 
   const _UserProfileSection({required this.userRole});
 
   @override
+  State<_UserProfileSection> createState() => _UserProfileSectionState();
+}
+
+class _UserProfileSectionState extends State<_UserProfileSection> {
+  String? _displayName;
+  String? _email;
+  String? _profilePicture;
+  bool _isLoading = true;
+  final ApiService _apiService = ApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when returning to this screen
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final userSession = UserSession.instance;
+
+    // First load from session (fast)
+    setState(() {
+      _displayName = userSession.userDisplayName;
+      _email = userSession.userEmail;
+      _profilePicture = userSession.userProfilePicture;
+      _isLoading = false;
+    });
+
+    // Then try to refresh from server (to get latest data)
+    try {
+      if (userSession.userId != null && userSession.currentToken != null) {
+        final response = await _apiService.getProfile(
+          userSession.userId!,
+          userSession.currentToken!,
+        );
+
+        final user = response['user'];
+        userSession.updateUserData(user);
+
+        // Update UI with fresh data
+        if (mounted) {
+          setState(() {
+            _displayName = user['displayName'];
+            _email = user['email'];
+            _profilePicture = user['profilePicture'];
+          });
+        }
+      }
+    } catch (e) {
+      // If refresh fails, just continue with cached data
+      print('Failed to refresh profile data: $e');
+    }
+  }
+
+  Widget _buildProfileImage() {
+    if (_profilePicture != null && _profilePicture!.isNotEmpty) {
+      // Handle base64 image
+      if (_profilePicture!.startsWith('data:image')) {
+        try {
+          final base64String = ImageUtils.extractBase64FromDataUrl(
+            _profilePicture!,
+          );
+          if (base64String != null) {
+            final bytes = base64Decode(base64String);
+            return CircleAvatar(
+              radius: 30,
+              backgroundImage: MemoryImage(bytes),
+            );
+          }
+        } catch (e) {
+          // If base64 decoding fails, fall back to default
+        }
+      }
+      // Handle network image URL
+      return CircleAvatar(
+        radius: 30,
+        backgroundImage: NetworkImage(_profilePicture!),
+        onBackgroundImageError: (exception, stackTrace) {
+          // If network image fails, fall back to default
+        },
+      );
+    }
+
+    // Default avatar
+    return const CircleAvatar(
+      radius: 30,
+      backgroundColor: Color(0xFFE5E7EB),
+      child: Icon(Icons.person, size: 30, color: Color(0xFF9CA3AF)),
+    );
+  }
+
+  String _getDisplayText() {
+    // If user has a display name, use it; otherwise use role
+    if (_displayName != null && _displayName!.isNotEmpty) {
+      return _displayName!;
+    }
+    return _getRoleDisplayName(widget.userRole);
+  }
+
+  String _getEmailText() {
+    // Use actual user email if available
+    if (_email != null && _email!.isNotEmpty) {
+      return _email!;
+    }
+    return 'No email set';
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const EditProfileScreen()),
         );
+        // Refresh user data when returning from edit profile
+        if (result != null || mounted) {
+          _loadUserData();
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(16.0),
@@ -113,56 +235,67 @@ class _UserProfileSection extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/jane.png'), // Placeholder
+        child: _isLoading
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: CircularProgressIndicator(color: Color(0xFF209A9F)),
                 ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _getRoleDisplayName(userRole),
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    if (userRole.toLowerCase() != 'admin') ...[
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Kamraan.shaa@gmail.com',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF6B7280),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildProfileImage(),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _getDisplayText(),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _getEmailText(),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF6B7280),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            Row(
-              children: [
-                Text(
-                  'Edit Profile',
-                  style: const TextStyle(fontSize: 14, color: Color(0xFF374151)),
-                ),
-                const Spacer(),
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16, 
-                  color: Color(0xFF9CA3AF)
-                ),
-              ],
-            ),
-          ],
-        ),
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      const Text(
+                        'Edit Profile',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF374151),
+                        ),
+                      ),
+                      const Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -267,8 +400,10 @@ class _ReportSettingsSectionState extends State<_ReportSettingsSection> {
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -283,12 +418,10 @@ class _ReportSettingsSectionState extends State<_ReportSettingsSection> {
                 reportFormat = newValue!;
               });
             },
-            items: <String>['PDF', 'Excel']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
+            items: <String>['PDF', 'Excel'].map<DropdownMenuItem<String>>((
+              String value,
+            ) {
+              return DropdownMenuItem<String>(value: value, child: Text(value));
             }).toList(),
           ),
         ],
@@ -381,7 +514,7 @@ class _AiAlertSensitivitySectionState
               Text('Medium', style: const TextStyle(color: Color(0xFF6B7280))),
               Text('High', style: const TextStyle(color: Color(0xFF6B7280))),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -420,10 +553,7 @@ class _PrivacyAndSecuritySection extends StatelessWidget {
             onTap: () {},
           ),
           const SizedBox(height: 24),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: _LogoutButton(),
-          ),
+          Align(alignment: Alignment.centerLeft, child: _LogoutButton()),
         ],
       ),
     );
@@ -436,12 +566,18 @@ class _LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
-      onPressed: () {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-          (Route<dynamic> route) => false,
-        );
+      onPressed: () async {
+        // Clear user session
+        await UserSession.instance.clearSession();
+
+        // Navigate to login screen
+        if (context.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (Route<dynamic> route) => false,
+          );
+        }
       },
       icon: SvgPicture.asset('assets/logout.svg'),
       label: const Text(
@@ -452,16 +588,17 @@ class _LogoutButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         minimumSize: const Size(0, 40), // allow button to shrink
         side: const BorderSide(color: Color(0xFF209A9F), width: 1.5),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
     );
   }
 }
 
-Widget _buildSection(BuildContext context,
-    {required String title, required Widget child}) {
+Widget _buildSection(
+  BuildContext context, {
+  required String title,
+  required Widget child,
+}) {
   return Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
@@ -500,14 +637,14 @@ Widget _buildSwitchTile({
       activeColor: const Color(0xFFD4D4D4),
       inactiveTrackColor: const Color(0xFFE5E7EB),
       inactiveThumbColor: const Color(0xFFD4D4D4),
-      trackOutlineColor: MaterialStateProperty.resolveWith<Color?>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
-            return null;
-          }
-          return Colors.transparent;
-        },
-      ),
+      trackOutlineColor: MaterialStateProperty.resolveWith<Color?>((
+        Set<MaterialState> states,
+      ) {
+        if (states.contains(MaterialState.selected)) {
+          return null;
+        }
+        return Colors.transparent;
+      }),
     ),
     onTap: () {
       onChanged(!value);
@@ -515,8 +652,12 @@ Widget _buildSwitchTile({
   );
 }
 
-Widget _buildManageTile(BuildContext context,
-    {required String iconPath, required String title, VoidCallback? onTap}) {
+Widget _buildManageTile(
+  BuildContext context, {
+  required String iconPath,
+  required String title,
+  VoidCallback? onTap,
+}) {
   return GestureDetector(
     onTap: onTap,
     child: Container(
@@ -534,18 +675,22 @@ Widget _buildManageTile(BuildContext context,
           ),
           child: Row(
             children: [
-              SvgPicture.asset(iconPath,
-                  width: 20,
-                  height: 20,
-                  colorFilter: const ColorFilter.mode(
-                      Color(0xFF4B5563), BlendMode.srcIn)),
+              SvgPicture.asset(
+                iconPath,
+                width: 20,
+                height: 20,
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF4B5563),
+                  BlendMode.srcIn,
+                ),
+              ),
               const SizedBox(width: 16),
               Text(title, style: const TextStyle(fontSize: 16)),
               const Spacer(),
               const Icon(
                 Icons.arrow_forward_ios,
-                size: 14, 
-                color: Color(0xFF9CA3AF)
+                size: 14,
+                color: Color(0xFF9CA3AF),
               ),
             ],
           ),
@@ -555,8 +700,12 @@ Widget _buildManageTile(BuildContext context,
   );
 }
 
-Widget _buildPrivacyItem(BuildContext context,
-    {required String iconPath, required String title, VoidCallback? onTap}) {
+Widget _buildPrivacyItem(
+  BuildContext context, {
+  required String iconPath,
+  required String title,
+  VoidCallback? onTap,
+}) {
   return GestureDetector(
     onTap: onTap,
     child: Container(
@@ -573,11 +722,11 @@ Widget _buildPrivacyItem(BuildContext context,
           const Spacer(),
           const Icon(
             Icons.arrow_forward_ios,
-            size: 14, 
-            color: Color(0xFF9CA3AF)
+            size: 14,
+            color: Color(0xFF9CA3AF),
           ),
         ],
       ),
     ),
   );
-} 
+}
