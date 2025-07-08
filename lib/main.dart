@@ -5,7 +5,7 @@ import 'view/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -13,9 +13,8 @@ void main() async {
     print('Firebase initialized successfully');
   } catch (e) {
     print('Firebase initialization error: $e');
-    // Continue anyway - Firebase might still work
   }
-  
+
   runApp(const MyApp());
 }
 
