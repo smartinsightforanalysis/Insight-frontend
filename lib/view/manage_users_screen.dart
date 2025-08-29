@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:insight/view/add_new_user_screen.dart';
+import 'package:insight/l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 
@@ -65,9 +66,8 @@ class _ManageUsersScreenState extends State<ManageUsersScreen>
         throw Exception('Authentication token not found. Please login again.');
       }
 
-      print(
-        'Loading users with token: ${token.substring(0, 20)}...',
-      ); // Debug log
+      print('Loading users with token: ${token.substring(0, 20)}...'); // Debug log
+      print('User role: ${UserSession.instance.userRole}'); // Debug log
 
       final response = await _apiService.getAllUsers(token);
       print('Users response: $response'); // Debug log
@@ -88,15 +88,26 @@ class _ManageUsersScreenState extends State<ManageUsersScreen>
       print('Loaded ${users.length} users'); // Debug log
     } catch (e) {
       print('Error loading users: $e'); // Debug log
-      setState(() {
-        _error = e.toString().replaceFirst('Exception: ', '');
-        _isLoading = false;
-      });
+
+      // Handle specific 403 error
+      if (e.toString().contains('403') || e.toString().contains('Forbidden')) {
+        setState(() {
+          _error = 'Access denied. You may not have permission to view users or your session may have expired. Please try logging out and logging back in.';
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _error = e.toString().replaceFirst('Exception: ', '');
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
@@ -108,8 +119,8 @@ class _ManageUsersScreenState extends State<ManageUsersScreen>
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Manage Users',
+        title: Text(
+          localizations?.manageUsers ?? 'Manage Users',
           style: TextStyle(
             color: Colors.black,
             fontSize: 20,
@@ -139,8 +150,8 @@ class _ManageUsersScreenState extends State<ManageUsersScreen>
             }
           },
           icon: const Icon(Icons.add, color: Colors.white, size: 24.0),
-          label: const Text(
-            'Add New User',
+          label: Text(
+            localizations?.addNewUser ?? 'Add New User',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -185,7 +196,10 @@ class _ManageUsersScreenState extends State<ManageUsersScreen>
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF209A9F),
               ),
-              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+              child: Text(
+                AppLocalizations.of(context)?.retry ?? 'Retry',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -200,7 +214,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen>
             Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No users found',
+              AppLocalizations.of(context)?.noUsersFound ?? 'No users found',
               style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
           ],
@@ -254,8 +268,10 @@ class _UserListItem extends StatelessWidget {
     }
   }
 
-  String _formatLastOnline(String? lastLogin) {
-    if (lastLogin == null) return 'Never logged in';
+  String _formatLastOnline(BuildContext context, String? lastLogin) {
+    final localizations = AppLocalizations.of(context);
+    if (lastLogin == null)
+      return localizations?.neverLoggedIn ?? 'Never logged in';
 
     try {
       final DateTime loginTime = DateTime.parse(lastLogin);
@@ -269,10 +285,10 @@ class _UserListItem extends StatelessWidget {
       } else if (difference.inMinutes > 0) {
         return '${difference.inMinutes}m ago';
       } else {
-        return 'Just now';
+        return localizations?.justNow ?? 'Just now';
       }
     } catch (e) {
-      return 'Unknown';
+      return localizations?.unknown ?? 'Unknown';
     }
   }
 
@@ -342,9 +358,14 @@ class _UserListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String name = user['name'] ?? user['displayName'] ?? 'Unknown User';
-    final String role = user['role'] ?? 'unknown';
-    final String lastOnline = _formatLastOnline(user['lastLogin']);
+    final localizations = AppLocalizations.of(context);
+    final String name =
+        user['name'] ??
+        user['displayName'] ??
+        (localizations?.unknownUser ?? 'Unknown User');
+    final String role =
+        user['role'] ?? (localizations?.unknownRole ?? 'unknown');
+    final String lastOnline = _formatLastOnline(context, user['lastLogin']);
 
     return Container(
       padding: const EdgeInsets.all(16.0),

@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class BehaviorScoreWidget extends StatelessWidget {
   final int productivityScore;
   final int attendanceScore;
+  final int? realProductivityScore;
+  final bool isLoadingProductivity;
 
   const BehaviorScoreWidget({
     Key? key,
     required this.productivityScore,
     required this.attendanceScore,
+    this.realProductivityScore,
+    this.isLoadingProductivity = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    print('🎯 BehaviorScoreWidget - realProductivityScore: $realProductivityScore, isLoading: $isLoadingProductivity');
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
@@ -29,9 +38,9 @@ class BehaviorScoreWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Behavior Score',
-            style: TextStyle(
+          Text(
+            localizations.behaviorScore,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Color(0xFF1C3557),
@@ -75,22 +84,35 @@ class BehaviorScoreWidget extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Productivity',
-                          style: TextStyle(
+                        Text(
+                          localizations.productivity,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: Color(0xFF4B5563),
                           ),
                         ),
-                        Text(
-                          '95%',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF16A3AC),
-                          ),
-                        ),
+                        isLoadingProductivity
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF16A3AC),
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                realProductivityScore != null
+                                    ? '$realProductivityScore%'
+                                    : '0%', // Fallback to 0% instead of hardcoded 95%
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF16A3AC),
+                                ),
+                              ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -99,9 +121,9 @@ class BehaviorScoreWidget extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Attendance',
-                          style: TextStyle(
+                        Text(
+                          localizations.attendance,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: Color(0xFF4B5563),

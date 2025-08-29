@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:insight/view/download_progress_screen.dart';
+import 'package:insight/l10n/app_localizations.dart';
+import 'package:insight/view/incidents_download_progress_screen.dart';
 
 class ExportReportDialog extends StatefulWidget {
   final String reportType;
@@ -18,20 +19,21 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
   final TextEditingController _employeeController = TextEditingController();
   String selectedExportFormat = 'PDF';
   bool includeChartsGraphs = false;
+  bool includeImages = true;
 
-  final List<String> reportTypes = [
-    'Incident Report',
-    'Performance Report',
-    'Attendance Report',
-    'Behavior Report',
+  List<String> get reportTypes => [
+    AppLocalizations.of(context)!.incidentReport,
+    AppLocalizations.of(context)!.performanceReport,
+    AppLocalizations.of(context)!.attendanceReport,
+    AppLocalizations.of(context)!.behaviorReport,
   ];
 
-  final List<String> dateRanges = [
-    'Last 7 days',
-    'Last 30 days',
-    'Last 3 months',
-    'Last 6 months',
-    'Custom range',
+  List<String> get dateRanges => [
+    AppLocalizations.of(context)!.last7Days,
+    AppLocalizations.of(context)!.last30Days,
+    AppLocalizations.of(context)!.last3Months,
+    AppLocalizations.of(context)!.last6Months,
+    AppLocalizations.of(context)!.customRange,
   ];
 
   @override
@@ -48,6 +50,8 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.70,
       decoration: const BoxDecoration(
@@ -65,11 +69,11 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(left: 4.0),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
                   child: Text(
-                    'Report',
-                    style: TextStyle(
+                    localizations.report,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF333333),
@@ -93,12 +97,13 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Report Type
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4.0),
+                  // Report Type - COMMENTED OUT
+                  /*
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
                     child: Text(
-                      'Report Type',
-                      style: TextStyle(
+                      localizations.reportType,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF374151),
@@ -119,9 +124,9 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: selectedReportType,
-                        hint: const Text(
-                          'Select report type',
-                          style: TextStyle(
+                        hint: Text(
+                          localizations.selectReportType,
+                          style: const TextStyle(
                             color: Color(0xFF9CA3AF),
                             fontSize: 16,
                           ),
@@ -155,13 +160,15 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                   ),
 
                   const SizedBox(height: 24),
+                  */
 
-                  // Date Range
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4.0),
+                  // Date Range - COMMENTED OUT
+                  /*
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
                     child: Text(
-                      'Date Range',
-                      style: TextStyle(
+                      localizations.dateRange,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF374151),
@@ -185,7 +192,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            selectedDateRange ?? 'Select date range',
+                            selectedDateRange ?? localizations.selectDateRange,
                             style: TextStyle(
                               fontSize: 16,
                               color: selectedDateRange != null
@@ -204,13 +211,15 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                   ),
 
                   const SizedBox(height: 24),
+                  */
 
-                  // Employee
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4.0),
+                  // Employee - COMMENTED OUT
+                  /*
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
                     child: Text(
-                      'Employee (optional)',
-                      style: TextStyle(
+                      localizations.employeeOptional,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF374151),
@@ -221,7 +230,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                   TextField(
                     controller: _employeeController,
                     decoration: InputDecoration(
-                      hintText: 'All employees',
+                      hintText: localizations.allEmployees,
                       hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
                       suffixIcon: Container(
                         width: 20,
@@ -247,13 +256,15 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                   ),
 
                   const SizedBox(height: 24),
+                  */
 
-                  // Export Format
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4.0),
+                  // Export Format - COMMENTED OUT
+                  /*
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
                     child: Text(
-                      'Export Format',
-                      style: TextStyle(
+                      localizations.exportFormat,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF374151),
@@ -271,7 +282,10 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                             });
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
                             decoration: BoxDecoration(
                               color: selectedExportFormat == 'PDF'
                                   ? const Color(0xFFECFDF5)
@@ -319,7 +333,10 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                             });
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 12,
+                            ),
                             decoration: BoxDecoration(
                               color: selectedExportFormat == 'Excel'
                                   ? const Color(0xFFECFDF5)
@@ -362,6 +379,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                   ),
 
                   const SizedBox(height: 24),
+                  */
 
                   // Include Charts/Graphs Toggle
                   Padding(
@@ -369,9 +387,9 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Include Charts/Graphs',
-                          style: TextStyle(
+                        Text(
+                          localizations.includeChartsGraphs,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF374151),
@@ -382,6 +400,37 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                           onChanged: (bool value) {
                             setState(() {
                               includeChartsGraphs = value;
+                            });
+                          },
+                          activeColor: const Color(0xFF209A9F),
+                          inactiveThumbColor: const Color(0xFF9CA3AF),
+                          inactiveTrackColor: const Color(0xFFE5E7EB),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Include Images Toggle
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          localizations.includeSnapshots,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF374151),
+                          ),
+                        ),
+                        Switch(
+                          value: includeImages,
+                          onChanged: (bool value) {
+                            setState(() {
+                              includeImages = value;
                             });
                           },
                           activeColor: const Color(0xFF209A9F),
@@ -422,9 +471,12 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                   height: 20,
                   color: Colors.white,
                 ),
-                label: const Text(
-                  'Export Report',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                label: Text(
+                  localizations.exportReport,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -435,57 +487,19 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
   }
 
   void _handleExport(BuildContext context) {
-    // Validate required fields
-    if (selectedReportType == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a report type'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (selectedDateRange == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a date range'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // Close dialog and show export message
+    // Close dialog and navigate to incidents download progress screen
     Navigator.of(context).pop();
 
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => const DownloadProgressScreen(),
-    ));
-
-    // TODO: Implement actual export functionality
-  }
-
-  void _showDateRangeDialog(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      initialDateRange: DateTimeRange(
-        start: DateTime.now().subtract(const Duration(days: 30)),
-        end: DateTime.now(),
+    // Navigate to incidents download progress screen with both parameters
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => IncidentsDownloadProgressScreen(
+          includeChartsGraphs: includeChartsGraphs,
+          includeImages: includeImages,
+        ),
       ),
     );
-
-    if (picked != null) {
-      setState(() {
-        selectedDateRange =
-            '${_formatDate(picked.start)} - ${_formatDate(picked.end)}';
-      });
-    }
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
+  // Removed unused date range methods since date range section is commented out
 }

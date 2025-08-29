@@ -11,8 +11,11 @@ import 'staff_screen.dart';
 import 'report_screen.dart';
 import 'user_settings_screen.dart';
 import '../services/api_service.dart';
+import '../services/ai_api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:insight/view/download_progress_screen.dart';
+import 'package:insight/l10n/app_localizations.dart';
+
 
 class AdminDashboard extends StatefulWidget {
   final String userRole;
@@ -31,9 +34,33 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   // Branch management
   final ApiService _apiService = ApiService();
+  final AiApiService _aiApiService = AiApiService();
   Map<String, dynamic>? _currentBranch;
   String _currentBranchName = 'Main Branch';
   String? _currentBranchId;
+
+  // AI API data
+  double? _averageBehaviorScore;
+  bool _isLoadingBehaviorScore = true;
+  String? _topBranchName;
+  bool _isLoadingTopBranch = true;
+  double? _overallProductivity;
+  bool _isLoadingProductivity = true;
+  List<Map<String, dynamic>> _underperformingZones = [];
+  bool _isLoadingUnderperformingZones = true;
+  Map<String, dynamic>? _performanceInsight;
+  List<Map<String, dynamic>> _branchPerformanceData = [];
+  bool _isLoadingBranchPerformance = true;
+  String _selectedBranchPeriod = '1d'; // Default to daily
+  List<Map<String, dynamic>> _recentBehaviors = [];
+  int _totalEvents = 0;
+  Map<String, dynamic> _behaviorSummary = {};
+  String _timePeriod = 'Last 24 hours';
+  bool _isLoadingRecentBehaviors = true;
+  List<String> _recommendations = [];
+  bool _isLoadingPerformanceInsight = true;
+  List<Map<String, dynamic>> _topEmployees = [];
+  bool _isLoadingTopEmployees = true;
 
   // Filter dropdown management
   List<Map<String, dynamic>> _allBranches = [];
@@ -44,8 +71,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
   void initState() {
     super.initState();
     _loadDefaultBranch();
+    _loadAverageBehaviorScore();
+    _loadTopBranch();
+    _loadProductivity();
+    _loadUnderperformingZones();
+    _loadPerformanceInsight();
+    _loadTopEmployees();
+    _loadBranchPerformance();
+    _loadRecentBehaviors();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.addListener(_scrollListener);
+      // Show secret key modal after dashboard loads
+      _showSecretKeyModal();
     });
   }
 
@@ -92,6 +129,253 @@ class _AdminDashboardState extends State<AdminDashboard> {
       // If there's an error loading branches, keep the default "Main Branch"
       print('Error loading default branch: $e');
     }
+  }
+
+  Future<void> _loadAverageBehaviorScore() async {
+    try {
+      setState(() {
+        _isLoadingBehaviorScore = true;
+      });
+
+      final response = await _aiApiService.getAverageBehaviorScore();
+
+      if (response['average_behavior_score'] != null) {
+        setState(() {
+          _averageBehaviorScore = response['average_behavior_score'].toDouble();
+          _isLoadingBehaviorScore = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingBehaviorScore = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading average behavior score: $e');
+      setState(() {
+        _isLoadingBehaviorScore = false;
+      });
+    }
+  }
+
+  Future<void> _loadTopBranch() async {
+    try {
+      setState(() {
+        _isLoadingTopBranch = true;
+      });
+
+      final response = await _aiApiService.getTopBranch();
+
+      if (response['top_branch'] != null &&
+          response['top_branch']['name'] != null) {
+        setState(() {
+          _topBranchName = response['top_branch']['name'];
+          _isLoadingTopBranch = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingTopBranch = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading top branch: $e');
+      setState(() {
+        _isLoadingTopBranch = false;
+      });
+    }
+  }
+
+  Future<void> _loadProductivity() async {
+    try {
+      setState(() {
+        _isLoadingProductivity = true;
+      });
+
+      final response = await _aiApiService.getProductivity();
+
+      if (response['overall_productivity'] != null) {
+        setState(() {
+          _overallProductivity = response['overall_productivity'].toDouble();
+          _isLoadingProductivity = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingProductivity = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading productivity: $e');
+      setState(() {
+        _isLoadingProductivity = false;
+      });
+    }
+  }
+
+  Future<void> _loadUnderperformingZones() async {
+    try {
+      setState(() {
+        _isLoadingUnderperformingZones = true;
+      });
+
+      final response = await _aiApiService.getUnderperformingZones();
+
+      if (response['underperforming_zones'] != null) {
+        setState(() {
+          _underperformingZones = List<Map<String, dynamic>>.from(
+            response['underperforming_zones'],
+          );
+          _isLoadingUnderperformingZones = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingUnderperformingZones = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading underperforming zones: $e');
+      setState(() {
+        _isLoadingUnderperformingZones = false;
+      });
+    }
+  }
+
+  Future<void> _loadPerformanceInsight() async {
+    try {
+      setState(() {
+        _isLoadingPerformanceInsight = true;
+      });
+
+      final response = await _aiApiService.getPerformanceInsight();
+
+      if (response['insights'] != null && response['insights'].isNotEmpty) {
+        setState(() {
+          _performanceInsight = response['insights'][0]; // Get first insight
+          _recommendations = List<String>.from(
+            response['recommendations'] ?? [],
+          );
+          _isLoadingPerformanceInsight = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingPerformanceInsight = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading performance insight: $e');
+      setState(() {
+        _isLoadingPerformanceInsight = false;
+      });
+    }
+  }
+
+  Future<void> _loadTopEmployees() async {
+    try {
+      setState(() {
+        _isLoadingTopEmployees = true;
+      });
+
+      final response = await _aiApiService.getTop5Employees();
+
+      if (response['top_employees'] != null) {
+        setState(() {
+          _topEmployees = List<Map<String, dynamic>>.from(
+            response['top_employees'],
+          );
+          _isLoadingTopEmployees = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingTopEmployees = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading top employees: $e');
+      setState(() {
+        _isLoadingTopEmployees = false;
+      });
+    }
+  }
+
+  Future<void> _loadBranchPerformance([String? period]) async {
+    try {
+      setState(() {
+        _isLoadingBranchPerformance = true;
+      });
+
+      final periodToUse = period ?? _selectedBranchPeriod;
+      final response = await _aiApiService.getBranchPerformance(period: periodToUse);
+
+      if (response['branches'] != null) {
+        setState(() {
+          _branchPerformanceData = List<Map<String, dynamic>>.from(
+            response['branches'],
+          );
+          _isLoadingBranchPerformance = false;
+        });
+      } else {
+        setState(() {
+          _branchPerformanceData = [];
+          _isLoadingBranchPerformance = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading branch performance: $e');
+      setState(() {
+        _branchPerformanceData = [];
+        _isLoadingBranchPerformance = false;
+      });
+    }
+  }
+
+  void _onBranchPeriodChanged(String period) {
+    setState(() {
+      _selectedBranchPeriod = period;
+    });
+    _loadBranchPerformance(period);
+  }
+
+  Future<void> _loadRecentBehaviors() async {
+    try {
+      setState(() {
+        _isLoadingRecentBehaviors = true;
+      });
+
+      final response = await _aiApiService.getRecentBehaviors();
+
+      setState(() {
+        _recentBehaviors = List<Map<String, dynamic>>.from(
+          response['recent_behaviors'] ?? [],
+        );
+        _totalEvents = response['total_events'] ?? 0;
+        _behaviorSummary = Map<String, dynamic>.from(
+          response['behavior_summary'] ?? {},
+        );
+        _timePeriod = response['time_period']?.toString() ?? 'Last 24 hours';
+        _isLoadingRecentBehaviors = false;
+      });
+    } catch (e) {
+      print('Error loading recent behaviors: $e');
+      setState(() {
+        _recentBehaviors = [];
+        _totalEvents = 0;
+        _behaviorSummary = {};
+        _timePeriod = 'Last 24 hours';
+        _isLoadingRecentBehaviors = false;
+      });
+    }
+  }
+
+  Future<void> _refreshDashboardData() async {
+    await Future.wait([
+      _loadDefaultBranch(),
+      _loadAverageBehaviorScore(),
+      _loadTopBranch(),
+      _loadProductivity(),
+      _loadUnderperformingZones(),
+      _loadPerformanceInsight(),
+      _loadTopEmployees(),
+      _loadBranchPerformance(),
+      _loadRecentBehaviors(),
+    ]);
   }
 
   void _onBranchChanged(Map<String, dynamic> selectedBranch) {
@@ -152,12 +436,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
       _selectedFilterBranchId = branchId;
     });
 
-    // You can add logic here to filter dashboard data based on selected branch
-    // For example: refresh charts, update statistics, etc.
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Filter applied: $branchName'),
+        content: Text(
+          AppLocalizations.of(context)?.filterApplied(branchName) ??
+              'Filter applied: $branchName',
+        ),
         backgroundColor: const Color(0xFF209A9F),
         duration: const Duration(seconds: 2),
       ),
@@ -186,9 +470,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Filter by Branch',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)?.filterByBranch ??
+                          'Filter by Branch',
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF333333),
@@ -206,8 +491,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   children: [
                     // "All Branches" option
                     _buildFilterBranchItem(
-                      'All Branches',
-                      'Show data from all branches',
+                      AppLocalizations.of(context)?.allBranches ??
+                          'All Branches',
+                      AppLocalizations.of(context)?.showDataFromAllBranches ??
+                          'Show data from all branches',
                       null,
                       _selectedFilterBranch == 'All Branches',
                     ),
@@ -401,15 +688,117 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   String _getWelcomeMessage() {
+    final localizations = AppLocalizations.of(context);
     switch (widget.userRole.toLowerCase()) {
       case 'supervisor':
-        return 'Welcome, Supervisor';
+        return localizations?.welcomeSupervisor ?? 'Welcome, Supervisor';
       case 'auditor':
-        return 'Welcome, Auditor';
+        return localizations?.welcomeAuditor ?? 'Welcome, Auditor';
       case 'admin':
       default:
-        return 'Welcome, Admin';
+        return localizations?.welcomeAdmin ?? 'Welcome, Admin';
     }
+  }
+
+  void _showSecretKeyModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            margin: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF4F7FB),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  AppLocalizations.of(context)?.doYouHaveSecretKey ??
+                      'Do you have a secret key? If Yes',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF111827),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFF209A9F),
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Enter your secret key',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF209A9F),
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: const Text(
+                          'YES',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[300],
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: const Text(
+                          'NO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF111827),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -422,598 +811,667 @@ class _AdminDashboardState extends State<AdminDashboard> {
         currentBranchId: _currentBranchId,
         onBranchChanged: _onBranchChanged,
       ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Suggestion Bar
-              Container(
-                padding: EdgeInsets.all(12.0),
-                height: 70.0,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0F2FE), // Light blue background
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Row(
-                  children: [
-                    Text('💡', style: TextStyle(fontSize: 24.0)),
-                    SizedBox(width: 8.0),
-                    Expanded(
-                      child: Text(
-                        'Take a 10-min stretch break every 2 hours',
-                        style: TextStyle(color: const Color(0xFF6B7280)),
+      body: RefreshIndicator(
+        onRefresh: _refreshDashboardData,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Suggestion Bar
+                Container(
+                  padding: EdgeInsets.all(12.0),
+                  height: 70.0,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0F2FE), // Light blue background
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Text('💡', style: TextStyle(fontSize: 24.0)),
+                      SizedBox(width: 8.0),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(
+                                context,
+                              )?.stretchBreakSuggestion ??
+                              'Take a 10-min stretch break every 2 hours',
+                          style: TextStyle(color: const Color(0xFF6B7280)),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 16.0),
-              // Filter Buttons
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    // "All Branches" Button
-                    ElevatedButton(
-                      onPressed: _showBranchFilterDropdown,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFFF1F3F6,
-                        ), // Keep consistent light grey background
-                        shape: RoundedRectangleBorder(
+                SizedBox(height: 16.0),
+                SizedBox(height: 24.0),
+                // Today's Activity Header
+                Text(
+                  AppLocalizations.of(context)?.todaysActivity ??
+                      'Today\'s Activity',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF333333),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                // Activity Cards
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                    color: const Color(
+                      0xFFF9FAFB,
+                    ), // Background color for activity cards area
+                  ),
+                  child: Column(
+                    children: [
+                      // Average Behaviour Score Card
+                      Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFE0F2FE,
+                          ), // Light blue background
                           borderRadius: BorderRadius.circular(8.0),
                         ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 12.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _selectedFilterBranch,
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(
+                                    context,
+                                  )?.averageBehaviourScore ??
+                                  'Average Behaviour Score',
+                              style: TextStyle(color: const Color(0xFF4B5563)),
                             ),
-                          ),
-                          SizedBox(width: 4.0),
-                          SvgPicture.asset(
-                            'assets/direction-down.svg',
-                            color: Colors.grey[800],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 8.0), // Space between buttons
-                    // "This Week" Button
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFFF1F3F6,
-                        ), // Light grey background
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 12.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'This Week',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(width: 4.0),
-                          SvgPicture.asset(
-                            'assets/direction-down.svg',
-                            color: Colors.grey[800],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 8.0), // Space between buttons
-                    // "Employee" Button
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFFF1F3F6,
-                        ), // Light grey background
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 12.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Employee',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(width: 4.0),
-                          SvgPicture.asset(
-                            'assets/direction-down.svg',
-                            color: Colors.grey[800],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 8.0), // Space between buttons
-                    // "Behavior Type" Button
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFFF1F3F6,
-                        ), // Light grey background
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 12.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Behavior Type',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(width: 4.0),
-                          SvgPicture.asset(
-                            'assets/direction-down.svg',
-                            color: Colors.grey[800],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 24.0),
-              // Today's Activity Header
-              Text(
-                'Today\'s Activity',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF333333),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              // Activity Cards
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.0),
-                  color: const Color(
-                    0xFFF9FAFB,
-                  ), // Background color for activity cards area
-                ),
-                child: Column(
-                  children: [
-                    // Average Behaviour Score Card
-                    Container(
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0F2FE), // Light blue background
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Average Behaviour score',
-                            style: TextStyle(color: const Color(0xFF4B5563)),
-                          ),
-                          SizedBox(height: 8.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                      Text(
-                                        '247',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.teal[400],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 4.0,
-                                      ), // Add some spacing between the number and percentage
-                                      Text(
-                                        '↑ 2.4%',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xFF059669),
-                                        ), // Adjust font size if needed for alignment
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              CircleAvatar(
-                                backgroundColor: const Color(
-                                  0xFFEFF6FF,
-                                ), // Changed background color to #EFF6FF
-                                radius: 26.0,
-                                child: SvgPicture.asset(
-                                  'assets/onb2.svg',
-                                  height: 20.0,
-                                  // The SVG has an intrinsic aspect ratio, no need for width if height is set
-                                  // color: Colors.teal[400], // Keep original color if desired, or let SVG color show
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16.0),
-                    // Top Branch and Productivity Row
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Top Branch Card
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.all(16.0),
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFFE0F2FE,
-                                ), // Light blue background
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Column(
+                            SizedBox(height: 8.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                          CrossAxisAlignment.baseline,
+                                      textBaseline: TextBaseline.alphabetic,
                                       children: [
-                                        Text(
-                                          'Top Branch',
-                                          style: TextStyle(
-                                            color: const Color(0xFF4B5563),
-                                          ),
-                                        ),
-                                        SizedBox(height: 8.0),
-                                        FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            'Downtown',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color(0xFF2E7D32),
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.center,
-                                    child: CircleAvatar(
-                                      backgroundColor: const Color(0xFFD1FAE5),
-                                      radius: 26.0,
-                                      child: Icon(
-                                        Icons.emoji_events,
-                                        color: const Color(0xFF209A9F),
-                                        size: 30.0,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 16.0),
-                          // Productivity Card
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.all(16.0),
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFFE0F2FE,
-                                ), // Light blue background
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Productivity',
-                                          style: TextStyle(
-                                            color: const Color(0xFF4B5563),
-                                          ),
-                                        ),
-                                        SizedBox(height: 8.0),
-                                        FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          alignment: Alignment.centerLeft,
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.baseline,
-                                            textBaseline:
-                                                TextBaseline.alphabetic,
-                                            children: [
-                                              Text(
-                                                '87%',
+                                        _isLoadingBehaviorScore
+                                            ? SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(Colors.teal[400]!),
+                                                ),
+                                              )
+                                            : Text(
+                                                _averageBehaviorScore
+                                                        ?.toStringAsFixed(1) ??
+                                                    '0.0',
                                                 style: TextStyle(
                                                   fontSize: 24,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.teal[400],
                                                 ),
                                               ),
-                                              SizedBox(width: 4.0),
-                                              Text(
-                                                '↑ 2.4%',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: const Color(
-                                                    0xFF059669,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
                                       ],
                                     ),
+                                  ],
+                                ),
+                                CircleAvatar(
+                                  backgroundColor: const Color(
+                                    0xFFEFF6FF,
+                                  ), // Changed background color to #EFF6FF
+                                  radius: 26.0,
+                                  child: SvgPicture.asset(
+                                    'assets/onb2.svg',
+                                    height: 20.0,
+                                    // The SVG has an intrinsic aspect ratio, no need for width if height is set
+                                    // color: Colors.teal[400], // Keep original color if desired, or let SVG color show
                                   ),
-                                  CircleAvatar(
-                                    backgroundColor: const Color(
-                                      0xFFEFF6FF,
-                                    ), // Changed background color to #EFF6FF
-                                    radius: 26.0,
-                                    child: SvgPicture.asset(
-                                      'assets/prod.svg',
-                                      height:
-                                          30.0, // Set the height to match the previous icon size
-                                      // The SVG has an intrinsic aspect ratio, no need for width if height is set
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16.0),
+                      // Top Branch and Productivity Row
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Top Branch Card
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(16.0),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFFE0F2FE,
+                                  ), // Light blue background
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            AppLocalizations.of(
+                                                  context,
+                                                )?.topBranch ??
+                                                'Top Branch',
+                                            style: TextStyle(
+                                              color: const Color(0xFF4B5563),
+                                            ),
+                                          ),
+                                          SizedBox(height: 8.0),
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerLeft,
+                                            child: _isLoadingTopBranch
+                                                ? SizedBox(
+                                                    width: 20,
+                                                    height: 20,
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                            Color
+                                                          >(
+                                                            const Color(
+                                                              0xFF2E7D32,
+                                                            ),
+                                                          ),
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    _topBranchName ?? 'Unknow',
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: const Color(
+                                                        0xFF2E7D32,
+                                                      ),
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 1,
+                                                  ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
+                                    Align(
+                                      alignment: Alignment.center,
+                                      child: CircleAvatar(
+                                        backgroundColor: const Color(
+                                          0xFFD1FAE5,
+                                        ),
+                                        radius: 26.0,
+                                        child: Icon(
+                                          Icons.emoji_events,
+                                          color: const Color(0xFF209A9F),
+                                          size: 30.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 16.0),
+                            // Productivity Card
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(16.0),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFFE0F2FE,
+                                  ), // Light blue background
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            AppLocalizations.of(
+                                                  context,
+                                                )?.productivity ??
+                                                'Productivity',
+                                            style: TextStyle(
+                                              color: const Color(0xFF4B5563),
+                                            ),
+                                          ),
+                                          SizedBox(height: 8.0),
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerLeft,
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.baseline,
+                                              textBaseline:
+                                                  TextBaseline.alphabetic,
+                                              children: [
+                                                _isLoadingProductivity
+                                                    ? SizedBox(
+                                                        width: 24,
+                                                        height: 24,
+                                                        child: CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                          valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                Color
+                                                              >(
+                                                                Colors
+                                                                    .teal[400]!,
+                                                              ),
+                                                        ),
+                                                      )
+                                                    : Text(
+                                                        '${((_overallProductivity ?? 0) * 100).toStringAsFixed(0)}%',
+                                                        style: TextStyle(
+                                                          fontSize: 24,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color:
+                                                              Colors.teal[400],
+                                                        ),
+                                                      ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    CircleAvatar(
+                                      backgroundColor: const Color(
+                                        0xFFEFF6FF,
+                                      ), // Changed background color to #EFF6FF
+                                      radius: 26.0,
+                                      child: SvgPicture.asset(
+                                        'assets/prod.svg',
+                                        height:
+                                            30.0, // Set the height to match the previous icon size
+                                        // The SVG has an intrinsic aspect ratio, no need for width if height is set
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16.0),
+                      // Underperforming Zones Card
+                      Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFE0F2FE,
+                          ), // Light blue background
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(
+                                    context,
+                                  )?.underperformingZones ??
+                                  'Underperforming zones',
+                              style: TextStyle(color: const Color(0xFF4B5563)),
+                            ),
+                            SizedBox(height: 8.0),
+                            _isLoadingUnderperformingZones
+                                ? Center(
+                                    child: SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.red[700]!,
+                                            ),
+                                      ),
+                                    ),
+                                  )
+                                : _underperformingZones.isEmpty
+                                ? Text(
+                                    'No underperforming zones',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
+                                    ),
+                                  )
+                                : Column(
+                                    children: _underperformingZones.map((zone) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 8.0,
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Zone ${zone['zone']}',
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      color: Colors.red[700],
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    '${zone['violations']} violations • ${((zone['productivity_score'] ?? 0) * 100).toStringAsFixed(0)}% productivity',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            CircleAvatar(
+                                              backgroundColor: Colors.red[100],
+                                              child: Icon(
+                                                Icons.arrow_downward,
+                                                color: Colors.red[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
                                   ),
-                                ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // CLONED AI INSIGHTS SECTION
+                SizedBox(height: 24.0),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)?.aiInsights ??
+                            'AI Insights',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF111111),
+                        ),
+                      ),
+                      SizedBox(height: 16.0),
+                      // Attendance Pattern Card
+                      Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(bottom: 16.0),
+                        padding: EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x0F000000),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/robot.svg',
+                                  width: 22,
+                                  height: 22,
+                                ),
+                                SizedBox(width: 8.0),
+                                Text(
+                                  AppLocalizations.of(
+                                        context,
+                                      )?.attendancePattern ??
+                                      'Attendance Pattern',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 17,
+                                    color: Color(0xFF222222),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10.0),
+                            Text(
+                              AppLocalizations.of(
+                                    context,
+                                  )?.highAbsenteeismDetected ??
+                                  'High absenteeism detected on Mondays.\nConsider reviewing work schedules.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF4B5563),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 16.0),
-                    // Underperforming Zones Card
-                    Container(
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0F2FE), // Light blue background
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Underperforming zones',
-                            style: TextStyle(color: const Color(0xFF4B5563)),
-                          ),
-                          SizedBox(height: 8.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Zone 4',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.red[700],
-                                ),
-                              ),
-                              CircleAvatar(
-                                backgroundColor: Colors.red[100],
-                                child: Icon(
-                                  Icons.arrow_downward,
-                                  color: Colors.red[700],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // CLONED AI INSIGHTS SECTION
-              SizedBox(height: 24.0),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Color(0xFFF9FAFB),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'AI Insights',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF111111),
-                      ),
-                    ),
-                    SizedBox(height: 16.0),
-                    // Attendance Pattern Card
-                    Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.only(bottom: 16.0),
-                      padding: EdgeInsets.all(20.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x0F000000),
-                            blurRadius: 8,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/robot.svg',
-                                width: 22,
-                                height: 22,
-                              ),
-                              SizedBox(width: 8.0),
-                              Text(
-                                'Attendance Pattern',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 17,
-                                  color: Color(0xFF222222),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0),
-                          Text(
-                            'High absenteeism detected on Mondays.\nConsider reviewing work schedules.',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF4B5563),
+                      // Performance Insight Card
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x0F000000),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Performance Insight Card
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(20.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x0F000000),
-                            blurRadius: 8,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/bulb.svg',
-                                width: 22,
-                                height: 22,
-                              ),
-                              SizedBox(width: 8.0),
-                              Text(
-                                'Performance Insight',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 17,
-                                  color: Color(0xFF222222),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/bulb.svg',
+                                  width: 22,
+                                  height: 22,
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0),
-                          Text(
-                            'Team engagement peaks during afternoon shifts. Optimize task allocation.',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF4B5563),
+                                SizedBox(width: 8.0),
+                                Text(
+                                  AppLocalizations.of(
+                                        context,
+                                      )?.performanceInsight ??
+                                      AppLocalizations.of(
+                                        context,
+                                      )?.performanceInsight ??
+                                      'Performance Insight',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 17,
+                                    color: Color(0xFF222222),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 10.0),
+                            _isLoadingPerformanceInsight
+                                ? Center(
+                                    child: SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Color(0xFF4B5563),
+                                            ),
+                                      ),
+                                    ),
+                                  )
+                                : _performanceInsight == null
+                                ? Text(
+                                    'No performance insights available',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
+                                    ),
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _performanceInsight!['title'] ??
+                                            'Performance Insight',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF222222),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8.0),
+                                      Text(
+                                        _performanceInsight!['message'] ??
+                                            'No message available',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xFF4B5563),
+                                        ),
+                                      ),
+                                      if (_recommendations.isNotEmpty) ...[
+                                        SizedBox(height: 12.0),
+                                        Text(
+                                          'Recommendations:',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF222222),
+                                          ),
+                                        ),
+                                        SizedBox(height: 6.0),
+                                        ...(_recommendations
+                                            .take(3)
+                                            .map(
+                                              (recommendation) => Padding(
+                                                padding: const EdgeInsets.only(
+                                                  bottom: 4.0,
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      '• ',
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        color: Color(
+                                                          0xFF4B5563,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(
+                                                        recommendation,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: Color(
+                                                            0xFF4B5563,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                            .toList()),
+                                      ],
+                                    ],
+                                  ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 24.0),
-              StaffPerformanceChart(
-                title: "Staff Performance",
-                data: const [50, 72, 93, 57, 29, 91, 75],
-                avatars: const [
-                  'assets/sk.png',
-                  'assets/jane.png',
-                  'assets/sk.png',
-                  'assets/jane.png',
-                  'assets/sk.png',
-                  'assets/jane.png',
-                  'assets/sk.png',
-                ],
-              ),
-              SizedBox(height: 24.0),
-              TopEmployeesWidget(),
-              SizedBox(height: 24.0),
-              BranchPerformanceChart(),
-              SizedBox(height: 24.0),
-              BranchesPerformanceWidget(),
-              SizedBox(height: 24.0),
-              RecentBehavioursWidget(key: _recentBehavioursKey),
-            ],
+                SizedBox(height: 24.0),
+                StaffPerformanceChart(
+                  title:
+                      AppLocalizations.of(context)?.staffPerformance ??
+                      "Staff Performance",
+                  data: const [50, 72, 93, 57, 29, 91, 75],
+                ),
+                SizedBox(height: 24.0),
+                TopEmployeesWidget(
+                  employees: _topEmployees,
+                  isLoading: _isLoadingTopEmployees,
+                ),
+                SizedBox(height: 24.0),
+                BranchPerformanceChart(
+                  branches: _branchPerformanceData,
+                  isLoading: _isLoadingBranchPerformance,
+                  onPeriodChanged: _onBranchPeriodChanged,
+                ),
+                SizedBox(height: 24.0),
+                BranchesPerformanceWidget(
+                  branches: _branchPerformanceData,
+                  isLoading: _isLoadingBranchPerformance,
+                ),
+                SizedBox(height: 24.0),
+                RecentBehavioursWidget(
+                  key: _recentBehavioursKey,
+                  recentBehaviors: _recentBehaviors,
+                  totalEvents: _totalEvents,
+                  behaviorSummary: _behaviorSummary,
+                  timePeriod: _timePeriod,
+                  isLoading: _isLoadingRecentBehaviors,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1031,9 +1489,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                 );
               },
-              label: const Text(
-                'Export Report',
-                style: TextStyle(
+              label: Text(
+                AppLocalizations.of(context)?.exportReport ?? 'Export Report',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Colors.white,

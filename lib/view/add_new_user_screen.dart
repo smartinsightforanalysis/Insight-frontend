@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
 
@@ -16,17 +17,18 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   String? _selectedRole = 'supervisor';
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
-  
-  final ApiService _apiService = ApiService();
 
+  final ApiService _apiService = ApiService();
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
@@ -34,19 +36,16 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Add new user',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          localizations?.addNewUser ?? 'Add New User',
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.grey.shade200,
-            height: 1.0,
-          ),
+          child: Container(color: Colors.grey.shade200, height: 1.0),
         ),
       ),
       body: Form(
@@ -57,87 +56,124 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField(
-                label: 'Full Name', 
-                hint: 'Enter full name', 
+                label: localizations?.fullName ?? 'Full Name',
+                hint: localizations?.enterFullName ?? 'Enter full name',
                 isRequired: true,
                 controller: _fullNameController,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Full name is required';
+                    return localizations?.fullNameRequired ??
+                        'Full name is required';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 24),
               _buildTextField(
-                label: 'Email Address', 
-                hint: 'Enter email address', 
+                label: localizations?.email ?? 'Email',
+                hint: localizations?.enterYourEmail ?? 'Enter email',
                 isRequired: true,
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Email address is required';
+                    return localizations?.pleaseEnterEmail ??
+                        'Please enter your email';
                   }
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                    return 'Please enter a valid email address';
+                  if (!RegExp(
+                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                  ).hasMatch(value)) {
+                    return 'Please enter a valid email';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 24),
               _buildTextField(
-                label: 'Phone Number', 
-                hint: 'Enter phone number',
+                label: localizations?.phoneNumber ?? 'Phone Number',
+                hint: localizations?.enterPhoneNumber ?? 'Enter phone number',
+                isRequired: true,
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Phone number is required';
+                    return localizations?.phoneNumberRequired ??
+                        'Phone number is required';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 24),
-              _buildRoleDropdown(),
-              const SizedBox(height: 24),
-              _buildPasswordField(
-                label: 'Password',
-                hint: 'Create password',
-                isVisible: _isPasswordVisible,
-                controller: _passwordController,
-                onToggleVisibility: () {
+              _buildDropdownField(
+                label: localizations?.role ?? 'Role',
+                hint: localizations?.selectRole ?? 'Select Role',
+                value: _selectedRole,
+                items: const ['supervisor', 'auditor'],
+                onChanged: (value) {
                   setState(() {
-                    _isPasswordVisible = !_isPasswordVisible;
+                    _selectedRole = value;
                   });
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Password is required';
+                    return localizations?.pleaseSelectRole ??
+                        'Please select a role';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              _buildTextField(
+                label: localizations?.password ?? 'Password',
+                hint: localizations?.enterYourPassword ?? 'Enter password',
+                isRequired: true,
+                controller: _passwordController,
+                obscureText: !_isPasswordVisible,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return localizations?.pleaseEnterPassword ?? 'Please enter your password';
                   }
                   if (value.length < 6) {
-                    return 'Password must be at least 6 characters long';
+                    return 'Password must be at least 6 characters';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 24),
-               _buildPasswordField(
-                label: 'Confirm Password',
+              _buildTextField(
+                label: localizations?.confirmPassword ?? 'Confirm Password',
                 hint: 'Re-enter password',
-                isVisible: _isConfirmPasswordVisible,
+                isRequired: true,
                 controller: _confirmPasswordController,
-                onToggleVisibility: () {
-                  setState(() {
-                    _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                  });
-                },
+                obscureText: !_isConfirmPasswordVisible,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    });
+                  },
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please confirm your password';
+                    return localizations?.pleaseConfirmPassword ?? 'Please confirm your password';
                   }
                   if (value != _passwordController.text) {
-                    return 'Passwords do not match';
+                    return localizations?.passwordsDoNotMatch ?? 'Passwords do not match';
                   }
                   return null;
                 },
@@ -167,9 +203,9 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
                     strokeWidth: 2,
                   ),
                 )
-              : const Text(
-                  'Add User',
-                  style: TextStyle(
+              : Text(
+                  localizations?.addUser ?? 'Add User',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16.0,
@@ -206,7 +242,7 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
       }
 
       print('Creating user with role: $_selectedRole'); // Debug log
-      
+
       final response = await _apiService.addUser(
         fullName: _fullNameController.text.trim(),
         email: _emailController.text.trim(),
@@ -220,9 +256,10 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
       print('User created successfully: $response'); // Debug log
 
       if (mounted) {
+        final localizations = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User added successfully!'),
+          SnackBar(
+            content: Text(localizations?.userAddedSuccessfully ?? 'User added successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -233,7 +270,9 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString().replaceFirst('Exception: ', '')}'),
+            content: Text(
+              'Error: ${e.toString().replaceFirst('Exception: ', '')}',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -248,12 +287,14 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
   }
 
   Widget _buildTextField({
-    required String label, 
-    required String hint, 
+    required String label,
+    required String hint,
     bool isRequired = false,
     TextEditingController? controller,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
+    bool obscureText = false,
+    Widget? suffixIcon,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,9 +302,18 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
         RichText(
           text: TextSpan(
             text: label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151)),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF374151),
+            ),
             children: isRequired
-                ? const [TextSpan(text: ' *', style: TextStyle(color: Colors.red))]
+                ? const [
+                    TextSpan(
+                      text: ' *',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ]
                 : [],
           ),
         ),
@@ -272,9 +322,11 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
+          obscureText: obscureText,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
+            suffixIcon: suffixIcon,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
@@ -285,68 +337,23 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 16,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildRoleDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: const TextSpan(
-            text: 'Role',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151)),
-            children: [TextSpan(text: ' *', style: TextStyle(color: Colors.red))],
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: _selectedRole,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-          ),
-          items: const [
-            DropdownMenuItem<String>(
-              value: 'supervisor',
-              child: Text('Supervisor'),
-            ),
-            DropdownMenuItem<String>(
-              value: 'auditor',
-              child: Text('Auditor'),
-            ),
-          ],
-          onChanged: (String? newValue) {
-            setState(() {
-              _selectedRole = newValue;
-            });
-          },
-          icon: const Icon(Icons.keyboard_arrow_down),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPasswordField({
+  Widget _buildDropdownField({
     required String label,
     required String hint,
-    required bool isVisible,
-    required VoidCallback onToggleVisibility,
-    TextEditingController? controller,
-    String? Function(String?)? validator,
+    required String? value,
+    required List<String> items,
+    required void Function(String?) onChanged,
+    required String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,18 +361,24 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
         RichText(
           text: TextSpan(
             text: label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF374151)),
-            children: const [TextSpan(text: ' *', style: TextStyle(color: Colors.red))],
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF374151),
+            ),
+            children: const [
+              TextSpan(
+                text: ' *',
+                style: TextStyle(color: Colors.red),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
+        DropdownButtonFormField<String>(
+          value: value,
           validator: validator,
-          obscureText: !isVisible,
           decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
@@ -376,17 +389,21 @@ class _AddNewUserScreenState extends State<AddNewUserScreen> {
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-            suffixIcon: IconButton(
-              icon: Icon(
-                isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                color: const Color(0xFF9CA3AF),
-              ),
-              onPressed: onToggleVisibility,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 16,
             ),
           ),
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item, 
+              child: Text(item.substring(0, 1).toUpperCase() + item.substring(1))
+            );
+          }).toList(),
+          onChanged: onChanged,
+          icon: const Icon(Icons.keyboard_arrow_down),
         ),
       ],
     );
   }
-} 
+}

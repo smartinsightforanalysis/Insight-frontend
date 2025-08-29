@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import '../services/ai_api_service.dart';
 
 class StaffComparisonChart extends StatefulWidget {
   final String title;
   final List<int> data;
-  final List<String> avatars;
 
   const StaffComparisonChart({
     Key? key,
     required this.title,
     required this.data,
-    required this.avatars,
   }) : super(key: key);
 
   @override
@@ -17,7 +16,72 @@ class StaffComparisonChart extends StatefulWidget {
 }
 
 class _StaffComparisonChartState extends State<StaffComparisonChart> {
+  final AiApiService _aiApiService = AiApiService();
   int _selectedIndex = 0; // 0: D, 1: W, 2: M
+  List<int> _apiData = [];
+  List<String> _employeeNames = [];
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompareStaffData();
+  }
+
+  Future<void> _loadCompareStaffData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      final period = _selectedIndex == 0 ? '1d' : _selectedIndex == 1 ? '7d' : '30d';
+
+      final response = await _aiApiService.getCompareStaffChart(
+        metric: 'productivity',
+        chartType: 'bar',
+        period: period,
+      );
+
+      if (response['data'] != null && response['data'] is List) {
+        final data = List<Map<String, dynamic>>.from(response['data']);
+        final chartData = data.map((item) {
+          final score = item['score'] ?? 0;
+          return (score is num) ? score.round().clamp(0, 100) : 0;
+        }).toList();
+
+        final employeeNames = data.map((item) {
+          return item['employee']?.toString() ?? 'Unknown';
+        }).toList();
+
+        setState(() {
+          _apiData = chartData.isNotEmpty ? chartData : [0, 0, 0, 0, 0, 0, 0];
+          _employeeNames = employeeNames;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _apiData = [0, 0, 0, 0, 0, 0, 0]; // Fallback data
+          _employeeNames = [];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load comparison data';
+        _apiData = [0, 0, 0, 0, 0, 0, 0]; // Fallback data
+        _employeeNames = [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<int> get _currentData {
+    return _apiData.isNotEmpty ? _apiData : widget.data;
+  }
+
+
 
   // Responsive helper methods
   double _getResponsiveChartHeight(BuildContext context) {
@@ -42,16 +106,7 @@ class _StaffComparisonChartState extends State<StaffComparisonChart> {
     }
   }
 
-  double _getResponsiveAvatarRadius(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < 360) {
-      return 10.0;
-    } else if (screenWidth < 400) {
-      return 12.0;
-    } else {
-      return 14.5;
-    }
-  }
+
 
   double _getResponsiveSpacing(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -79,7 +134,6 @@ class _StaffComparisonChartState extends State<StaffComparisonChart> {
   Widget build(BuildContext context) {
     final chartHeight = _getResponsiveChartHeight(context);
     final barWidth = _getResponsiveBarWidth(context);
-    final avatarRadius = _getResponsiveAvatarRadius(context);
     final spacing = _getResponsiveSpacing(context);
     final titleFontSize = _getResponsiveTitleFontSize(context);
 
@@ -228,11 +282,11 @@ class _StaffComparisonChartState extends State<StaffComparisonChart> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.end,
-                              children: List.generate(widget.data.length, (i) {
+                              children: List.generate(_currentData.length, (i) {
                                 // Calculate bar height as percentage of available space above 0 line
                                 // Available space from 0 line to top: (chartHeight / 5) * 4 + (chartHeight / 10)
                                 final double availableHeight = (chartHeight / 5) * 4 + (chartHeight / 10);
-                                final double barHeight = (widget.data[i] / 100.0) * availableHeight;
+                                final double barHeight = (_currentData[i] / 100.0) * availableHeight;
 
                                 return Padding(
                                   padding: EdgeInsets.symmetric(horizontal: spacing / 2),
@@ -254,18 +308,6 @@ class _StaffComparisonChartState extends State<StaffComparisonChart> {
                         ],
                       ),
                     ),
-
-                    // Avatars row
-                    SizedBox(height: spacing),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(widget.avatars.length, (i) {
-                        return CircleAvatar(
-                          radius: avatarRadius,
-                          backgroundImage: AssetImage(widget.avatars[i]),
-                        );
-                      }),
-                    ),
                   ],
                 ),
               ),
@@ -284,6 +326,7 @@ class _StaffComparisonChartState extends State<StaffComparisonChart> {
         setState(() {
           _selectedIndex = idx;
         });
+        _loadCompareStaffData();
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),

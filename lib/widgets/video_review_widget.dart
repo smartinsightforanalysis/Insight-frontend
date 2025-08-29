@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class VideoReviewWidget extends StatefulWidget {
   final String title;
@@ -141,13 +142,13 @@ class _VideoReviewWidgetState extends State<VideoReviewWidget> {
           // Buttons for filtering video content
           Row(
             children: [
-              _buildToggleButton('All', 0, const Color(0xFF1E293B)),
+              _buildToggleButton(AppLocalizations.of(context)!.all, 0, const Color(0xFF1E293B)),
               const SizedBox(width: 8),
-              _buildToggleButton('Aggression', 1, const Color(0xFFEF4444)),
+              _buildToggleButton(AppLocalizations.of(context)!.aggression, 1, const Color(0xFFEF4444)),
               const SizedBox(width: 8),
-              _buildToggleButton('Absent', 2, const Color(0xFFFACC15)),
+              _buildToggleButton(AppLocalizations.of(context)!.absent, 2, const Color(0xFFFACC15)),
               const SizedBox(width: 8),
-              _buildToggleButton('Idle', 3, const Color(0xFF3B82F6)),
+              _buildToggleButton(AppLocalizations.of(context)!.idle, 3, const Color(0xFF3B82F6)),
             ],
           ),
         ],

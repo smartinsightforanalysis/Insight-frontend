@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:insight/l10n/app_localizations.dart';
 import '../widgets/bottom_bar.dart';
+import '../services/ai_api_service.dart';
 import 'staff_screen.dart';
 import 'admin_dashboard.dart';
 import 'detailed_report_screen.dart';
@@ -19,6 +21,176 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   int _currentIndex = 1; // Reports tab is selected
   String _selectedPeriod = 'Daily';
+
+  // API service and incident data
+  final AiApiService _aiApiService = AiApiService();
+  int _totalIncidents = 247; // Default value
+  double _averageConfidence = 0.12; // Default value (12%)
+  bool _isLoadingIncidents = true;
+
+  // Behaviors data
+  int _totalBehaviors = 183; // Default value
+  double _behaviorsPercentage = 0.0; // Default value (0%)
+  bool _isLoadingBehaviors = true;
+
+  // Away time data
+  int _totalAwayTime = 92; // Default value
+  double _awayTimePercentage = -5.0; // Default value (-5%)
+  bool _isLoadingAwayTime = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadIncidentsData();
+    _loadBehaviorsData();
+    _loadAwayTimeData();
+  }
+
+  Future<void> _loadIncidentsData() async {
+    try {
+      setState(() {
+        _isLoadingIncidents = true;
+      });
+
+      final periodCode = _getPeriodCode(_selectedPeriod);
+      final response = await _aiApiService.getIncidents(period: periodCode);
+
+      if (response['total_incidents'] != null &&
+          response['statistics'] != null) {
+        setState(() {
+          _totalIncidents = response['total_incidents'];
+          _averageConfidence =
+              response['statistics']['average_confidence'] ?? 0.0;
+          _isLoadingIncidents = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingIncidents = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading incidents data: $e');
+      setState(() {
+        _isLoadingIncidents = false;
+      });
+    }
+  }
+
+  Future<void> _loadBehaviorsData() async {
+    try {
+      setState(() {
+        _isLoadingBehaviors = true;
+      });
+
+      final periodCode = _getPeriodCode(_selectedPeriod);
+      final response = await _aiApiService.getBehaviors(period: periodCode);
+
+      // Extract data from the actual API response structure
+      final behaviors = response['behaviors'];
+      final behaviorRatio = response['behavior_ratio'];
+
+      if (behaviors != null && behaviors['employee_behavior_summary'] != null &&
+          behaviorRatio != null && behaviorRatio['positive_percentage'] != null) {
+        final employeeCount = (behaviors['employee_behavior_summary'] as List).length;
+        final positivePercentage = (behaviorRatio['positive_percentage'] ?? 0.0).toDouble();
+
+        setState(() {
+          _totalBehaviors = employeeCount;
+          _behaviorsPercentage = positivePercentage;
+          _isLoadingBehaviors = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingBehaviors = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading behaviors data: $e');
+      setState(() {
+        _isLoadingBehaviors = false;
+      });
+    }
+  }
+
+  Future<void> _loadAwayTimeData() async {
+    try {
+      setState(() {
+        _isLoadingAwayTime = true;
+      });
+
+      final periodCode = _getPeriodCode(_selectedPeriod);
+      final response = await _aiApiService.getAwayTime(period: periodCode);
+
+      if (response['status_breakdown'] != null) {
+        final statusBreakdown = response['status_breakdown'];
+
+        // Calculate total away time from status breakdown
+        int totalAwayTime = 0;
+        if (statusBreakdown is Map<String, dynamic>) {
+          statusBreakdown.forEach((key, value) {
+            if (value is num) {
+              totalAwayTime += value.toInt();
+            }
+          });
+        }
+
+        // Get percentage change if available
+        double percentageChange = _awayTimePercentage; // Keep default if not available
+        if (response['percentage_change'] != null) {
+          percentageChange = (response['percentage_change'] as num).toDouble();
+        }
+
+        setState(() {
+          _totalAwayTime = totalAwayTime > 0 ? totalAwayTime : _totalAwayTime;
+          _awayTimePercentage = percentageChange;
+          _isLoadingAwayTime = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingAwayTime = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading away time data: $e');
+      setState(() {
+        _isLoadingAwayTime = false;
+      });
+    }
+  }
+
+  Future<void> _refreshAllData() async {
+    await Future.wait([
+      _loadIncidentsData(),
+      _loadBehaviorsData(),
+      _loadAwayTimeData(),
+    ]);
+  }
+
+  String _getPeriodCode(String uiPeriod) {
+    switch (uiPeriod.toLowerCase()) {
+      case 'daily':
+        return '1d';
+      case 'weekly':
+        return '7d';
+      case 'monthly':
+        return '30d';
+      default:
+        return '7d'; // Default to weekly
+    }
+  }
+
+  String _getPeriodSubtitle(String uiPeriod, AppLocalizations? localizations) {
+    switch (uiPeriod.toLowerCase()) {
+      case 'daily':
+        return 'Last 1 day';
+      case 'weekly':
+        return localizations?.lastSevenDays ?? 'Last 7 days';
+      case 'monthly':
+        return 'Last 30 days';
+      default:
+        return localizations?.lastSevenDays ?? 'Last 7 days';
+    }
+  }
 
   void _onItemTapped(int index) {
     if (index == 0) {
@@ -59,12 +231,29 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   void _navigateToDetailedReport(String reportTitle) {
+    final localizations = AppLocalizations.of(context);
+    String translatedTitle;
+
+    switch (reportTitle) {
+      case 'Incident Report':
+        translatedTitle = localizations?.incidentReport ?? 'Incident Report';
+        break;
+      case 'Behavior Report':
+        translatedTitle = localizations?.behaviorReport ?? 'Behavior Report';
+        break;
+      case 'Away Time Report':
+        translatedTitle = localizations?.awayTimeReport ?? 'Away Time Report';
+        break;
+      default:
+        translatedTitle = reportTitle;
+    }
+
     Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
             DetailedReportScreen(
-              reportTitle: reportTitle,
+              reportTitle: translatedTitle,
               userRole: widget.userRole,
             ),
         transitionDuration: Duration.zero,
@@ -75,6 +264,8 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -89,8 +280,8 @@ class _ReportScreenState extends State<ReportScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Report',
+            Text(
+              localizations?.report ?? 'Report',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -130,8 +321,8 @@ class _ReportScreenState extends State<ReportScreen> {
                     BlendMode.srcIn,
                   ),
                 ),
-                label: const Text(
-                  'View Analytics',
+                label: Text(
+                  localizations?.viewAnalytics ?? 'View Analytics',
                   style: TextStyle(fontSize: 14, color: Color(0xFF374151)),
                 ),
               ),
@@ -139,58 +330,80 @@ class _ReportScreenState extends State<ReportScreen> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Period Selection Tabs
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+      body: RefreshIndicator(
+        onRefresh: _refreshAllData,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Period Selection Tabs
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildPeriodTab(localizations?.daily ?? 'Daily'),
+                      _buildPeriodTab(localizations?.weekly ?? 'Weekly'),
+                      _buildPeriodTab(localizations?.monthly ?? 'Monthly'),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    _buildPeriodTab('Daily'),
-                    _buildPeriodTab('Weekly'),
-                    _buildPeriodTab('Monthly'),
-                  ],
+                const SizedBox(height: 24),
+                // Report Cards
+                _buildReportCard(
+                  title: localizations?.incident ?? 'Incident',
+                  subtitle: _getPeriodSubtitle(_selectedPeriod, localizations),
+                  value: _isLoadingIncidents
+                      ? '...'
+                      : _totalIncidents.toString(),
+                  percentage: _isLoadingIncidents
+                      ? '...'
+                      : '↑${(_averageConfidence * 100).toStringAsFixed(0)}%',
+                  percentageColor: const Color(0xFF10B981),
+                  borderColor: const Color(0xFF10B981),
+                  onTap: () => _navigateToDetailedReport('Incident Report'),
                 ),
-              ),
-              const SizedBox(height: 24),
-              // Report Cards
-              _buildReportCard(
-                title: 'Incident',
-                subtitle: 'Last 7 days',
-                value: '247',
-                percentage: '↑12%',
-                percentageColor: const Color(0xFF10B981),
-                borderColor: const Color(0xFF10B981),
-                onTap: () => _navigateToDetailedReport('Incident Report'),
-              ),
-              const SizedBox(height: 16),
-              _buildReportCard(
-                title: 'Behaviors',
-                subtitle: 'Last 7 days',
-                value: '183',
-                percentage: '—0%',
-                percentageColor: const Color(0xFFF59E0B),
-                borderColor: const Color(0xFFF59E0B),
-                onTap: () => _navigateToDetailedReport('Behavior Report'),
-              ),
-              const SizedBox(height: 16),
-              _buildReportCard(
-                title: 'Away time',
-                subtitle: 'Last 7 days',
-                value: '92',
-                percentage: '↓5%',
-                percentageColor: const Color(0xFFEF4444),
-                borderColor: const Color(0xFFEF4444),
-                onTap: () => _navigateToDetailedReport('Away Time Report'),
-              ),
-            ],
+                const SizedBox(height: 16),
+                _buildReportCard(
+                  title: localizations?.behaviors ?? 'Behaviors',
+                  subtitle: _getPeriodSubtitle(_selectedPeriod, localizations),
+                  value: _isLoadingBehaviors
+                      ? '...'
+                      : _totalBehaviors.toString(),
+                  percentage: _isLoadingBehaviors
+                      ? '...'
+                      : _behaviorsPercentage == 0.0
+                          ? '—0%'
+                          : '↑${_behaviorsPercentage.toStringAsFixed(0)}%',
+                  percentageColor: _behaviorsPercentage == 0.0
+                      ? const Color(0xFFF59E0B)
+                      : const Color(0xFF10B981),
+                  borderColor: const Color(0xFFF59E0B),
+                  onTap: () => _navigateToDetailedReport('Behavior Report'),
+                ),
+                const SizedBox(height: 16),
+                _buildReportCard(
+                  title: localizations?.awayTime ?? 'Away time',
+                  subtitle: _getPeriodSubtitle(_selectedPeriod, localizations),
+                  value: _isLoadingAwayTime ? '...' : _totalAwayTime.toString(),
+                  percentage: _isLoadingAwayTime
+                      ? '...'
+                      : _awayTimePercentage >= 0
+                          ? '↑${_awayTimePercentage.toStringAsFixed(0)}%'
+                          : '↓${_awayTimePercentage.abs().toStringAsFixed(0)}%',
+                  percentageColor: _awayTimePercentage >= 0
+                      ? const Color(0xFF10B981) // Green for positive
+                      : const Color(0xFFEF4444), // Red for negative
+                  borderColor: const Color(0xFFEF4444),
+                  onTap: () => _navigateToDetailedReport('Away Time Report'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -210,6 +423,8 @@ class _ReportScreenState extends State<ReportScreen> {
           setState(() {
             _selectedPeriod = period;
           });
+          // Refresh data when period changes
+          _refreshAllData();
         },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -295,18 +510,25 @@ class _ReportScreenState extends State<ReportScreen> {
                   ],
                 ),
                 Container(
-                  width: 58,
+                  width: 68,
                   height: 28,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: title == 'Incident'
+                    color:
+                        title ==
+                            (AppLocalizations.of(context)?.incident ??
+                                'Incident')
                         ? const Color(0xFFD1FAE5)
-                        : title == 'Behaviors'
+                        : title ==
+                              (AppLocalizations.of(context)?.behaviors ??
+                                  'Behaviors')
                         ? const Color(0xFFFEF3C7)
-                        : title == 'Away time'
+                        : title ==
+                              (AppLocalizations.of(context)?.awayTime ??
+                                  'Away time')
                         ? const Color(0xFFFEE2E2)
                         : percentageColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -316,35 +538,67 @@ class _ReportScreenState extends State<ReportScreen> {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: title == 'Incident'
+                            text:
+                                title ==
+                                    (AppLocalizations.of(context)?.incident ??
+                                        'Incident')
                                 ? '↑'
-                                : title == 'Away time'
+                                : title ==
+                                      (AppLocalizations.of(context)?.awayTime ??
+                                          'Away time')
                                 ? '↓'
                                 : percentage[0],
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: title == 'Incident'
+                              color:
+                                  title ==
+                                      (AppLocalizations.of(context)?.incident ??
+                                          'Incident')
                                   ? const Color(0xFF047857)
-                                  : title == 'Behaviors'
+                                  : title ==
+                                        (AppLocalizations.of(
+                                              context,
+                                            )?.behaviors ??
+                                            'Behaviors')
                                   ? const Color(0xFFB45309)
-                                  : title == 'Away time'
+                                  : title ==
+                                        (AppLocalizations.of(
+                                              context,
+                                            )?.awayTime ??
+                                            'Away time')
                                   ? const Color(0xFFB91C1C)
                                   : percentageColor,
                             ),
                           ),
                           TextSpan(
-                            text: title == 'Incident'
-                                ? '12%'
+                            text:
+                                title ==
+                                    (AppLocalizations.of(context)?.incident ??
+                                        'Incident')
+                                ? _isLoadingIncidents
+                                      ? '...'
+                                      : '${(_averageConfidence * 100).toStringAsFixed(0)}%'
                                 : percentage.substring(1),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: title == 'Incident'
+                              color:
+                                  title ==
+                                      (AppLocalizations.of(context)?.incident ??
+                                          'Incident')
                                   ? const Color(0xFF047857)
-                                  : title == 'Behaviors'
+                                  : title ==
+                                        (AppLocalizations.of(
+                                              context,
+                                            )?.behaviors ??
+                                            'Behaviors')
                                   ? const Color(0xFFB45309)
-                                  : title == 'Away time'
+                                  : title ==
+                                        (AppLocalizations.of(
+                                              context,
+                                            )?.awayTime ??
+                                            'Away time')
                                   ? const Color(0xFFB91C1C)
                                   : percentageColor,
                             ),

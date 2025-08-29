@@ -1,0 +1,1450 @@
+{
+  "@@locale": "en",
+  "welcomeAdmin": "Welcome, Admin",
+  "@welcomeAdmin": {
+    "description": "Welcome message for admin users"
+  },
+  "welcomeSupervisor": "Welcome, Supervisor",
+  "@welcomeSupervisor": {
+    "description": "Welcome message for supervisor users"
+  },
+  "welcomeAuditor": "Welcome, Auditor",
+  "@welcomeAuditor": {
+    "description": "Welcome message for auditor users"
+  },
+  "editProfile": "Edit Profile",
+  "@editProfile": {
+    "description": "Edit profile button text"
+  },
+  "logOut": "Log Out",
+  "@logOut": {
+    "description": "Log out button text"
+  },
+  "privacyAndSecurity": "Privacy and Security",
+  "@privacyAndSecurity": {
+    "description": "Privacy and security section title"
+  },
+  "privacySettings": "Privacy Settings",
+  "@privacySettings": {
+    "description": "Privacy settings option"
+  },
+  "securitySettings": "Security Settings",
+  "@securitySettings": {
+    "description": "Security settings option"
+  },
+  "twoFactorAuthentication": "Two-Factor Authentication",
+  "@twoFactorAuthentication": {
+    "description": "Two-factor authentication option"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language option"
+  },
+  "noEmailSet": "No email set",
+  "@noEmailSet": {
+    "description": "Message when user has no email set"
+  },
+  "auditor": "Auditor",
+  "@auditor": {
+    "description": "Auditor role display name"
+  },
+  "supervisor": "Supervisor",
+  "@supervisor": {
+    "description": "Supervisor role display name"
+  },
+  "admin": "Admin",
+  "@admin": {
+    "description": "Admin role display name"
+  },
+  "user": "User",
+  "@user": {
+    "description": "Default user role display name"
+  },
+  "notificationPreferences": "Notification Preferences",
+  "@notificationPreferences": {
+    "description": "Notification preferences section title"
+  },
+  "harassmentAlerts": "Harassment Alerts",
+  "@harassmentAlerts": {
+    "description": "Harassment alerts setting title"
+  },
+  "harassmentAlertsSubtitle": "Receive alerts for potential harassment incidents",
+  "@harassmentAlertsSubtitle": {
+    "description": "Harassment alerts setting subtitle"
+  },
+  "inactivityNotifications": "Inactivity Notifications",
+  "@inactivityNotifications": {
+    "description": "Inactivity notifications setting title"
+  },
+  "inactivityNotificationsSubtitle": "Receive notifications when no activity is detected",
+  "@inactivityNotificationsSubtitle": {
+    "description": "Inactivity notifications setting subtitle"
+  },
+  "mobileUsageAlerts": "Mobile Usage Alerts",
+  "@mobileUsageAlerts": {
+    "description": "Mobile usage alerts setting title"
+  },
+  "mobileUsageAlertsSubtitle": "Receive alerts when unusual mobile usage is detected",
+  "@mobileUsageAlertsSubtitle": {
+    "description": "Mobile usage alerts setting subtitle"
+  },
+  "reportSettings": "Report Settings",
+  "@reportSettings": {
+    "description": "Report settings section title"
+  },
+  "autoDownloadWeeklyReports": "Auto-download weekly reports",
+  "@autoDownloadWeeklyReports": {
+    "description": "Auto-download weekly reports setting title"
+  },
+  "autoDownloadWeeklyReportsSubtitle": "Automatically download weekly reports in your preferred format.",
+  "@autoDownloadWeeklyReportsSubtitle": {
+    "description": "Auto-download weekly reports setting subtitle"
+  },
+  "reportFormat": "Report Format",
+  "@reportFormat": {
+    "description": "Report format setting title"
+  },
+  "pdf": "PDF",
+  "@pdf": {
+    "description": "PDF format option"
+  },
+  "excel": "Excel",
+  "@excel": {
+    "description": "Excel format option"
+  },
+  "manageBranches": "Manage Branches",
+  "@manageBranches": {
+    "description": "Manage branches option"
+  },
+  "manageUsers": "Manage Users",
+  "@manageUsers": {
+    "description": "Manage users option"
+  },
+  "aiAlertSensitivity": "AI Alert Sensitivity",
+  "@aiAlertSensitivity": {
+    "description": "AI alert sensitivity section title"
+  },
+  "low": "Low",
+  "@low": {
+    "description": "Low sensitivity level"
+  },
+  "medium": "Medium",
+  "@medium": {
+    "description": "Medium sensitivity level"
+  },
+  "high": "High",
+  "@high": {
+    "description": "High sensitivity level"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "signup": "Signup",
+  "@signup": {
+    "description": "Signup button text"
+  },
+  "selectRole": "Select Role",
+  "@selectRole": {
+    "description": "Select role label"
+  },
+  "selectYourRole": "Select your role",
+  "@selectYourRole": {
+    "description": "Select role placeholder"
+  },
+  "pleaseSelectRole": "Please select a role",
+  "@pleaseSelectRole": {
+    "description": "Role selection error message"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "enterYourEmail": "Enter your email",
+  "@enterYourEmail": {
+    "description": "Email field placeholder"
+  },
+  "pleaseEnterEmail": "Please enter your email",
+  "@pleaseEnterEmail": {
+    "description": "Email validation error"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "enterYourPassword": "Enter your password",
+  "@enterYourPassword": {
+    "description": "Password field placeholder"
+  },
+  "pleaseEnterPassword": "Please enter your password",
+  "@pleaseEnterPassword": {
+    "description": "Password validation error"
+  },
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "or": "or",
+  "@or": {
+    "description": "Divider text between login options"
+  },
+  "continueWithGoogle": "Continue with Google",
+  "@continueWithGoogle": {
+    "description": "Google sign in button text"
+  },
+  "signingIn": "Signing in...",
+  "@signingIn": {
+    "description": "Loading text for sign in"
+  },
+  "dontHaveAccount": "Don't have an account?",
+  "@dontHaveAccount": {
+    "description": "Sign up prompt text"
+  },
+  "fullName": "Full Name",
+  "@fullName": {
+    "description": "Full name field label"
+  },
+  "enterYourFullName": "Enter your full name",
+  "@enterYourFullName": {
+    "description": "Full name field placeholder"
+  },
+  "pleaseEnterName": "Please enter your name",
+  "@pleaseEnterName": {
+    "description": "Name validation error"
+  },
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "confirmYourPassword": "Confirm your password",
+  "@confirmYourPassword": {
+    "description": "Confirm password field placeholder"
+  },
+  "pleaseConfirmPassword": "Please confirm your password",
+  "@pleaseConfirmPassword": {
+    "description": "Confirm password validation error"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Password mismatch error"
+  },
+  "acceptTerms": "I accept the terms and Privacy policy",
+  "@acceptTerms": {
+    "description": "Terms acceptance text"
+  },
+  "read": "Read",
+  "@read": {
+    "description": "Read terms link text"
+  },
+  "mustAcceptTerms": "You must accept the terms and privacy policy",
+  "@mustAcceptTerms": {
+    "description": "Terms acceptance error"
+  },
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Login prompt text"
+  },
+  "welcomeMessage": "Welcome, {role}",
+  "@welcomeMessage": {
+    "description": "Welcome message with role placeholder",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "todaysActivity": "Today's Activity",
+  "@todaysActivity": {
+    "description": "Today's activity section title"
+  },
+  "averageBehaviourScore": "Average Behaviour score",
+  "@averageBehaviourScore": {
+    "description": "Average behaviour score label"
+  },
+  "topBranch": "Top Branch",
+  "@topBranch": {
+    "description": "Top branch label"
+  },
+  "productivity": "Productivity",
+  "@productivity": {
+    "description": "Productivity label"
+  },
+  "staffPerformance": "Staff Performance",
+  "@staffPerformance": {
+    "description": "Staff performance section title"
+  },
+  "topEmployees": "Top Employees",
+  "@topEmployees": {
+    "description": "Top employees section title"
+  },
+  "topEmployeesThisWeek": "Top Employees This Week",
+  "@topEmployeesThisWeek": {
+    "description": "Top employees this week section title"
+  },
+  "branchPerformance": "Branch Performance",
+  "branchesPerformance": "Branches Performance",
+  "@branchPerformance": {
+    "description": "Branch performance section title"
+  },
+  "@branchesPerformance": {
+    "description": "Branches performance section title"
+  },
+  "recentBehaviours": "Recent Behaviours",
+  "viewAll": "View All",
+  "exportReport": "Export Report",
+  "aiTag": "AI Tag",
+  "positive": "Positive",
+  "negative": "Negative",
+  "neutral": "Neutral",
+  "@recentBehaviours": {
+    "description": "Recent behaviours section title"
+  },
+  "@viewAll": {
+    "description": "View all button text"
+  },
+  "@exportReport": {
+    "description": "Export report button text"
+  },
+  "allBranches": "All Branches",
+  "@allBranches": {
+    "description": "All branches filter option"
+  },
+  "thisWeek": "This Week",
+  "@thisWeek": {
+    "description": "This week filter option"
+  },
+  "employee": "Employee",
+  "@employee": {
+    "description": "Employee filter option"
+  },
+  "behaviorType": "Behavior Type",
+  "@behaviorType": {
+    "description": "Behavior type filter option"
+  },
+  "filterByBranch": "Filter by Branch",
+  "@filterByBranch": {
+    "description": "Filter by branch modal title"
+  },
+  "showDataFromAllBranches": "Show data from all branches",
+  "@showDataFromAllBranches": {
+    "description": "All branches filter description"
+  },
+  "noAddress": "No address",
+  "@noAddress": {
+    "description": "No address placeholder"
+  },
+  "switchedToBranch": "Switched to {branchName}",
+  "@switchedToBranch": {
+    "description": "Branch switch confirmation message",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "filterApplied": "Filter applied: {branchName}",
+  "@filterApplied": {
+    "description": "Filter applied confirmation message",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "doYouHaveSecretKey": "Do you have a secret key? If Yes",
+  "@doYouHaveSecretKey": {
+    "description": "Secret key modal title"
+  },
+  "enterYourSecretKey": "Enter your secret key",
+  "@enterYourSecretKey": {
+    "description": "Secret key input placeholder"
+  },
+  "yes": "YES",
+  "@yes": {
+    "description": "Yes button text"
+  },
+  "no": "NO",
+  "@no": {
+    "description": "No button text"
+  },
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Dashboard tab label"
+  },
+  "reports": "Reports",
+  "@reports": {
+    "description": "Reports tab label"
+  },
+  "staff": "Staff",
+  "@staff": {
+    "description": "Staff tab label"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings tab label"
+  },
+  "analytics": "Analytics",
+  "@analytics": {
+    "description": "Analytics screen title"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications screen title"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile screen title"
+  },
+  "changePassword": "Change Password",
+  "@changePassword": {
+    "description": "Change password screen title"
+  },
+  "currentPassword": "Current Password",
+  "@currentPassword": {
+    "description": "Current password field label"
+  },
+  "newPassword": "New Password",
+  "@newPassword": {
+    "description": "New password field label"
+  },
+  "confirmNewPassword": "Confirm New Password",
+  "@confirmNewPassword": {
+    "description": "Confirm new password field label"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading text"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error text"
+  },
+  "success": "Success",
+  "@success": {
+    "description": "Success text"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Search placeholder text"
+  },
+  "noDataAvailable": "No data available",
+  "@noDataAvailable": {
+    "description": "No data message"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button text"
+  },
+  "networkError": "Network error. Please check your internet connection.",
+  "@networkError": {
+    "description": "Network error message"
+  },
+  "incorrectCredentials": "Incorrect email or password. Please try again.",
+  "@incorrectCredentials": {
+    "description": "Incorrect credentials error message"
+  },
+  "googleSignInFailed": "Google sign-in failed. Please try again.",
+  "@googleSignInFailed": {
+    "description": "Google sign-in failed error message"
+  },
+  "differentRoleError": "An account with this email exists but with a different role. Please try logging in with your correct role, or sign up with a different email.",
+  "@differentRoleError": {
+    "description": "Different role error message"
+  },
+  "noAccountFound": "No account found with this Google account and role. Please sign up first.",
+  "@noAccountFound": {
+    "description": "No account found error message"
+  },
+  "accountAlreadyLinked": "This Google account is already linked to another user. Please try logging in with your existing account.",
+  "@accountAlreadyLinked": {
+    "description": "Account already linked error message"
+  },
+  "networkErrorGoogle": "Network error during Google sign-in. Please check your internet connection.",
+  "@networkErrorGoogle": {
+    "description": "Network error during Google sign-in"
+  },
+  "googleSignInCancelled": "Google sign-in was cancelled.",
+  "@googleSignInCancelled": {
+    "description": "Google sign-in cancelled message"
+  },
+  "authenticationError": "Authentication error during Google sign-in. Please try again.",
+  "@authenticationError": {
+    "description": "Authentication error message"
+  },
+  "verificationCodeFailed": "Failed to send verification code. Please try again.",
+  "@verificationCodeFailed": {
+    "description": "Verification code failed message"
+  },
+  "emailAlreadyExists": "This email is already registered. Please try logging in instead.",
+  "@emailAlreadyExists": {
+    "description": "Email already exists error message"
+  },
+  "googleSignUpFailed": "Google sign-up failed. Please try again.",
+  "@googleSignUpFailed": {
+    "description": "Google sign-up failed error message"
+  },
+  "accountAlreadyExists": "An account with this email already exists. Please try logging in, or sign up with a different email.",
+  "@accountAlreadyExists": {
+    "description": "Account already exists error message"
+  },
+  "googleSignUpCancelled": "Google sign-up was cancelled.",
+  "@googleSignUpCancelled": {
+    "description": "Google sign-up cancelled message"
+  },
+  "contactSupport": "Please contact Support for Company Details",
+  "@contactSupport": {
+    "description": "Contact support message in header"
+  },
+  "users": "Users",
+  "@users": {
+    "description": "Users tab label for admin"
+  },
+  "stretchBreakSuggestion": "Take a 10-min stretch break every 2 hours",
+  "@stretchBreakSuggestion": {
+    "description": "Health suggestion for taking stretch breaks"
+  },
+  "underperformingZones": "Underperforming zones",
+  "@underperformingZones": {
+    "description": "Underperforming zones section title"
+  },
+  "aiInsights": "AI Insights",
+  "@aiInsights": {
+    "description": "AI Insights section title"
+  },
+  "attendancePattern": "Attendance Pattern",
+  "@attendancePattern": {
+    "description": "Attendance pattern insight title"
+  },
+  "highAbsenteeismDetected": "High absenteeism detected on Mondays. Consider reviewing work schedules.",
+  "@highAbsenteeismDetected": {
+    "description": "High absenteeism detected message"
+  },
+  "performanceInsight": "Performance Insight",
+  "@performanceInsight": {
+    "description": "Performance insight title"
+  },
+  "teamEngagementPeaks": "Team engagement peaks during afternoon shifts. Optimize task allocation.",
+  "@teamEngagementPeaks": {
+    "description": "Team engagement peaks message"
+  },
+  "excellentCustomerService": "Excellent customer service provided",
+  "harassmentBehaviorDetected": "Harassment behavior detected at Kitchen",
+  "extendedBreakTimeObserved": "Extended break time observed",
+  "frontDesk": "Front Desk",
+  "serviceArea": "Service area",
+  "restArea": "Rest area",
+  "@excellentCustomerService": {
+    "description": "Positive behavior description"
+  },
+  "@harassmentBehaviorDetected": {
+    "description": "Negative behavior description"
+  },
+  "@extendedBreakTimeObserved": {
+    "description": "Neutral behavior description"
+  },
+  "switchBranch": "Switch Branch",
+  "searchBranch": "Search Branch",
+  "searchBranches": "Search branches...",
+  "noBranchesFound": "No branches found",
+  "noBranchesAvailable": "No branches available",
+  "tryDifferentSearchTerm": "Try a different search term",
+  "unknownBranch": "Unknown Branch",
+  "unknownAddress": "Unknown Address",
+  "@switchBranch": {
+    "description": "Switch branch popup title"
+  },
+  "@searchBranch": {
+    "description": "Search branch label"
+  },
+  "@searchBranches": {
+    "description": "Search branches placeholder"
+  },
+  "@noBranchesFound": {
+    "description": "No branches found message"
+  },
+  "@noBranchesAvailable": {
+    "description": "No branches available message"
+  },
+  "@tryDifferentSearchTerm": {
+    "description": "Try different search term message"
+  },
+  "@unknownBranch": {
+    "description": "Unknown branch fallback text"
+  },
+  "@unknownAddress": {
+    "description": "Unknown address fallback text"
+  },
+  "report": "Report",
+  "viewAnalytics": "View Analytics",
+  "daily": "Daily",
+  "weekly": "Weekly",
+  "monthly": "Monthly",
+  "incident": "Incident",
+  "behaviors": "Behaviors",
+  "awayTime": "Away time",
+  "lastSevenDays": "Last 7 days",
+  "incidentReport": "Incident Report",
+  "behaviorReport": "Behavior Report",
+  "awayTimeReport": "Away Time Report",
+  "@report": {
+    "description": "Report screen title"
+  },
+  "@viewAnalytics": {
+    "description": "View analytics button text"
+  },
+  "@daily": {
+    "description": "Daily period tab"
+  },
+  "@weekly": {
+    "description": "Weekly period tab"
+  },
+  "@monthly": {
+    "description": "Monthly period tab"
+  },
+  "@incident": {
+    "description": "Incident report type"
+  },
+  "@behaviors": {
+    "description": "Behaviors report type"
+  },
+  "@awayTime": {
+    "description": "Away time report type"
+  },
+  "@lastSevenDays": {
+    "description": "Last 7 days subtitle"
+  },
+  "@incidentReport": {
+    "description": "Incident report title"
+  },
+  "@behaviorReport": {
+    "description": "Behavior report title"
+  },
+  "@awayTimeReport": {
+    "description": "Away time report title"
+  },
+  "staff": "Staff",
+  "searchStaff": "Search Staff..",
+  "allDepartments": "All Departments",
+  "scoreAll": "Score: All",
+  "serviceCounter": "Service Counter",
+  "serviceArea": "Service area",
+  "unknownUser": "Unknown User",
+  "unknownRole": "Unknown Role",
+  "@staff": {
+    "description": "Staff screen title"
+  },
+  "@searchStaff": {
+    "description": "Search staff placeholder"
+  },
+  "@allDepartments": {
+    "description": "All departments filter option"
+  },
+  "@scoreAll": {
+    "description": "Score filter all option"
+  },
+  "@serviceCounter": {
+    "description": "Service counter department"
+  },
+  "@serviceArea": {
+    "description": "Service area department"
+  },
+  "@unknownUser": {
+    "description": "Unknown user fallback"
+  },
+  "@unknownRole": {
+    "description": "Unknown role fallback"
+  },
+  "manageBranch": "Manage Branch",
+  "addNewBranch": "Add New Branch",
+  "noBranchesFound": "No branches found",
+  "addFirstBranch": "Add your first branch to get started",
+  "branchName": "Branch Name",
+  "branchAddress": "Branch Address",
+  "enterBranchName": "Enter branch name",
+  "enterBranchAddress": "Enter branch address",
+  "branchNameRequired": "Branch name is required",
+  "branchAddressRequired": "Branch address is required",
+  "addBranch": "Add Branch",
+  "branchAddedSuccessfully": "Branch added successfully!",
+  "unknownBranch": "Unknown",
+  "unknownAddress": "Unknown Address",
+  "@manageBranch": {
+    "description": "Manage branch screen title"
+  },
+  "@addNewBranch": {
+    "description": "Add new branch button and screen title"
+  },
+  "@noBranchesFound": {
+    "description": "No branches found message"
+  },
+  "@addFirstBranch": {
+    "description": "Add first branch instruction"
+  },
+  "@branchName": {
+    "description": "Branch name field label"
+  },
+  "@branchAddress": {
+    "description": "Branch address field label"
+  },
+  "@enterBranchName": {
+    "description": "Enter branch name placeholder"
+  },
+  "@enterBranchAddress": {
+    "description": "Enter branch address placeholder"
+  },
+  "@branchNameRequired": {
+    "description": "Branch name required validation"
+  },
+  "@branchAddressRequired": {
+    "description": "Branch address required validation"
+  },
+  "@addBranch": {
+    "description": "Add branch button text"
+  },
+  "@branchAddedSuccessfully": {
+    "description": "Branch added success message"
+  },
+  "manageUsers": "Manage Users",
+  "addNewUser": "Add New User",
+  "noUsersFound": "No users found",
+  "fullName": "Full Name",
+  "enterFullName": "Enter full name",
+  "fullNameRequired": "Full name is required",
+  "phoneNumber": "Phone Number",
+  "enterPhoneNumber": "Enter phone number",
+  "phoneNumberRequired": "Phone number is required",
+  "role": "Role",
+  "selectRole": "Select Role",
+  "pleaseSelectRole": "Please select a role",
+  "addUser": "Add User",
+  "userAddedSuccessfully": "User added successfully!",
+  "lastOnline": "Last online",
+  "neverLoggedIn": "Never logged in",
+  "justNow": "Just now",
+  "unknown": "Unknown",
+  "@manageUsers": {
+    "description": "Manage users screen title"
+  },
+  "@addNewUser": {
+    "description": "Add new user button and screen title"
+  },
+  "@noUsersFound": {
+    "description": "No users found message"
+  },
+  "@fullName": {
+    "description": "Full name field label"
+  },
+  "@enterFullName": {
+    "description": "Enter full name placeholder"
+  },
+  "@fullNameRequired": {
+    "description": "Full name required validation"
+  },
+  "@phoneNumber": {
+    "description": "Phone number field label"
+  },
+  "@enterPhoneNumber": {
+    "description": "Enter phone number placeholder"
+  },
+  "@phoneNumberRequired": {
+    "description": "Phone number required validation"
+  },
+  "@role": {
+    "description": "Role field label"
+  },
+  "@selectRole": {
+    "description": "Select role placeholder"
+  },
+  "@pleaseSelectRole": {
+    "description": "Please select role validation"
+  },
+  "@addUser": {
+    "description": "Add user button text"
+  },
+  "@userAddedSuccessfully": {
+    "description": "User added success message"
+  },
+  "@lastOnline": {
+    "description": "Last online label"
+  },
+  "@neverLoggedIn": {
+    "description": "Never logged in status"
+  },
+  "@justNow": {
+    "description": "Just now status"
+  },
+  "@unknown": {
+    "description": "Unknown status"
+  },
+  "pleaseEnterSecretKey": "Please enter your secret key",
+  "@pleaseEnterSecretKey": {
+    "description": "Secret key validation message"
+  },
+  "employeeProfile": "Employee Profile",
+  "behaviorScore": "Behavior Score",
+  "productivity": "Productivity",
+  "attendance": "Attendance",
+  "moreProductiveThanAverage": "{name} is {percentage}% more productive than average",
+  "performanceComparison": "Performance Comparison",
+  "avgDailyScore": "Avg Daily Score",
+  "workTime": "Work Time",
+  "performance": "Performance",
+  "compareStaff": "Compare Staff",
+  "awayTime": "Away time",
+  "awayFromZone": "{name} is away from assigned zone for {duration}",
+  "viewCameraLive": "View camera live",
+  "frameSnapshots": "Frame Snapshots",
+  "capturedFromFootage": "Captured from security footage",
+  "videoReview": "Video Review",
+  "downloadReport": "Download Report",
+  "@employeeProfile": {
+    "description": "Employee profile screen title"
+  },
+  "@behaviorScore": {
+    "description": "Behavior score section title"
+  },
+  "@productivity": {
+    "description": "Productivity label"
+  },
+  "@attendance": {
+    "description": "Attendance label"
+  },
+  "@moreProductiveThanAverage": {
+    "description": "Productivity comparison message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "@performanceComparison": {
+    "description": "Performance comparison section title"
+  },
+  "@avgDailyScore": {
+    "description": "Average daily score label"
+  },
+  "@workTime": {
+    "description": "Work time label"
+  },
+  "@performance": {
+    "description": "Performance label"
+  },
+  "@compareStaff": {
+    "description": "Compare staff section title"
+  },
+  "@awayTime": {
+    "description": "Away time section title"
+  },
+  "@awayFromZone": {
+    "description": "Away from zone message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewCameraLive": {
+    "description": "View camera live text"
+  },
+  "@frameSnapshots": {
+    "description": "Frame snapshots section title"
+  },
+  "@capturedFromFootage": {
+    "description": "Captured from footage description"
+  },
+  "@videoReview": {
+    "description": "Video review section title"
+  },
+  "@downloadReport": {
+    "description": "Download report section title"
+  },
+  "workHours": "Work Hours",
+  "@workHours": {
+    "description": "Work hours label"
+  },
+  "breakTime": "Break Time",
+  "@breakTime": {
+    "description": "Break time label"
+  },
+  "exportDetailedReportPdf": "Export the detailed report in PDF format",
+  "@exportDetailedReportPdf": {
+    "description": "Export detailed report description"
+  },
+  "includeAiInsights": "Include AI Insights",
+  "@includeAiInsights": {
+    "description": "Include AI insights toggle label"
+  },
+  "includeSnapshots": "Include Snapshots",
+  "@includeSnapshots": {
+    "description": "Include snapshots toggle label"
+  },
+  "downloadEmployeeSummary": "Download Employee Summary",
+  "@downloadEmployeeSummary": {
+    "description": "Download employee summary button text"
+  },
+  "yesterday": "Yesterday",
+  "@yesterday": {
+    "description": "Yesterday label"
+  },
+  "zoneAbsence": "Zone Absence",
+  "@zoneAbsence": {
+    "description": "Zone absence title"
+  },
+  "zone": "Zone",
+  "@zone": {
+    "description": "Zone label"
+  },
+  "minutes": "minutes",
+  "@minutes": {
+    "description": "Minutes label"
+  },
+  "forDuration": "for",
+  "@forDuration": {
+    "description": "For preposition used with duration"
+  },
+  "exportAllReports": "Export All Reports",
+  "@exportAllReports": {
+    "description": "Export all reports button text"
+  },
+  "critical": "Critical",
+  "@critical": {
+    "description": "Critical severity level"
+  },
+  "warning": "Warning",
+  "@warning": {
+    "description": "Warning severity level"
+  },
+  "fightDetected": "Fight Detected",
+  "@fightDetected": {
+    "description": "Fight detection incident type"
+  },
+  "harassmentAlert": "Harassment Alert",
+  "@harassmentAlert": {
+    "description": "Harassment alert incident type"
+  },
+  "phoneUsage": "Phone Usage",
+  "@phoneUsage": {
+    "description": "Phone usage incident type"
+  },
+  "longBreakAlert": "Long Break Alert",
+  "@longBreakAlert": {
+    "description": "Long break alert incident type"
+  },
+  "altercationAtCheckoutZone": "Altercation at Checkout Zone",
+  "@altercationAtCheckoutZone": {
+    "description": "Altercation incident description"
+  },
+  "aiConfidenceKitchenZone": "AI confidence, Kitchen Zone {percentage}%",
+  "@aiConfidenceKitchenZone": {
+    "description": "AI confidence description with percentage",
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "detectedDuringWorkHours": "Detected during work hours",
+  "@detectedDuringWorkHours": {
+    "description": "Detection during work hours description"
+  },
+  "checkoutCounterMinsAway": "Checkout Counter: {minutes} mins away",
+  "@checkoutCounterMinsAway": {
+    "description": "Checkout counter distance description",
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "minsAgo": "mins ago {minutes}",
+  "@minsAgo": {
+    "description": "Minutes ago time indicator",
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "kitchenZone": "Kitchen Zone",
+  "@kitchenZone": {
+    "description": "Kitchen zone location"
+  },
+  "checkoutZone": "Checkout Zone",
+  "@checkoutZone": {
+    "description": "Checkout zone location"
+  },
+  "checkoutCounter": "Checkout Counter",
+  "@checkoutCounter": {
+    "description": "Checkout counter location"
+  },
+  "customerAssisted90Satisfaction": "Customer assisted - 90% satisfaction",
+  "@customerAssisted90Satisfaction": {
+    "description": "Customer assistance satisfaction description"
+  },
+  "hourAgo": "1 hour ago",
+  "@hourAgo": {
+    "description": "One hour ago time indicator"
+  },
+  "filterEvents": "Filter Events",
+  "@filterEvents": {
+    "description": "Filter events popup title"
+  },
+  "dateRange": "Date Range",
+  "@dateRange": {
+    "description": "Date range filter section title"
+  },
+  "today": "Today",
+  "@today": {
+    "description": "Today date option"
+  },
+  "last7Days": "Last 7 Days",
+  "@last7Days": {
+    "description": "Last 7 days date option"
+  },
+  "custom": "Custom",
+  "@custom": {
+    "description": "Custom date range option"
+  },
+  "selectZones": "Select zones",
+  "@selectZones": {
+    "description": "Zone selection placeholder"
+  },
+  "severity": "Severity",
+  "@severity": {
+    "description": "Severity filter section title"
+  },
+  "normal": "Normal",
+  "@normal": {
+    "description": "Normal severity level"
+  },
+  "moderate": "Moderate",
+  "@moderate": {
+    "description": "Moderate severity level"
+  },
+  "suspicious": "Suspicious",
+  "@suspicious": {
+    "description": "Suspicious severity level"
+  },
+  "reset": "Reset",
+  "@reset": {
+    "description": "Reset button text"
+  },
+  "apply": "Apply",
+  "@apply": {
+    "description": "Apply button text"
+  },
+  "zoneA": "Zone A",
+  "@zoneA": {
+    "description": "Zone A option"
+  },
+  "zoneB": "Zone B",
+  "@zoneB": {
+    "description": "Zone B option"
+  },
+  "zoneC": "Zone C",
+  "@zoneC": {
+    "description": "Zone C option"
+  },
+  "zoneD": "Zone D",
+  "@zoneD": {
+    "description": "Zone D option"
+  },
+  "reportType": "Report Type",
+  "@reportType": {
+    "description": "Report type field label"
+  },
+  "selectReportType": "Select report type",
+  "@selectReportType": {
+    "description": "Report type selection placeholder"
+  },
+  "incidentReport": "Incident Report",
+  "@incidentReport": {
+    "description": "Incident report type"
+  },
+  "performanceReport": "Performance Report",
+  "@performanceReport": {
+    "description": "Performance report type"
+  },
+  "attendanceReport": "Attendance Report",
+  "@attendanceReport": {
+    "description": "Attendance report type"
+  },
+  "behaviorReport": "Behavior Report",
+  "@behaviorReport": {
+    "description": "Behavior report type"
+  },
+  "selectDateRange": "Select date range",
+  "@selectDateRange": {
+    "description": "Date range selection placeholder"
+  },
+  "last7Days": "Last 7 days",
+  "@last7Days": {
+    "description": "Last 7 days option"
+  },
+  "last30Days": "Last 30 days",
+  "@last30Days": {
+    "description": "Last 30 days option"
+  },
+  "last3Months": "Last 3 months",
+  "@last3Months": {
+    "description": "Last 3 months option"
+  },
+  "last6Months": "Last 6 months",
+  "@last6Months": {
+    "description": "Last 6 months option"
+  },
+  "customRange": "Custom range",
+  "@customRange": {
+    "description": "Custom range option"
+  },
+  "employeeOptional": "Employee (optional)",
+  "@employeeOptional": {
+    "description": "Employee field label"
+  },
+  "allEmployees": "All employees",
+  "@allEmployees": {
+    "description": "All employees placeholder"
+  },
+  "exportFormat": "Export Format",
+  "@exportFormat": {
+    "description": "Export format field label"
+  },
+  "includeChartsGraphs": "Include Charts/Graphs",
+  "@includeChartsGraphs": {
+    "description": "Include charts/graphs toggle label"
+  },
+  "pleaseSelectReportType": "Please select a report type",
+  "@pleaseSelectReportType": {
+    "description": "Report type validation message"
+  },
+  "pleaseSelectDateRange": "Please select a date range",
+  "@pleaseSelectDateRange": {
+    "description": "Date range validation message"
+  },
+  "zoneBreakdown": "Zone Breakdown",
+  "@zoneBreakdown": {
+    "description": "Zone breakdown section title"
+  },
+  "totalEvents": "Total Events",
+  "@totalEvents": {
+    "description": "Total events chart title"
+  },
+  "incident": "Incident",
+  "@incident": {
+    "description": "Incident label"
+  },
+  "behaviour": "Behaviour",
+  "@behaviour": {
+    "description": "Behaviour label"
+  },
+  "awaytime": "Awaytime",
+  "@awaytime": {
+    "description": "Awaytime label"
+  },
+  "serviceCounter": "Service Counter",
+  "@serviceCounter": {
+    "description": "Service counter zone name"
+  },
+  "customerArea": "Customer Area",
+  "@customerArea": {
+    "description": "Customer area zone name"
+  },
+  "timeSpent": "Time Spent",
+  "@timeSpent": {
+    "description": "Time spent label"
+  },
+  "incidents": "Incidents",
+  "@incidents": {
+    "description": "Incidents label"
+  },
+  "behavior": "Behaviour",
+  "@behavior": {
+    "description": "Behavior label"
+  },
+  "oneTime": "1 time",
+  "@oneTime": {
+    "description": "One time occurrence"
+  },
+  "hrMin": "1 hr 21 min",
+  "@hrMin": {
+    "description": "Time duration format"
+  },
+  "events": "Events",
+  "@events": {
+    "description": "Events title"
+  },
+  "event": "event",
+  "@event": {
+    "description": "Single event label"
+  },
+  "viewDetailedAnalysis": "View Detailed Analysis",
+  "@viewDetailedAnalysis": {
+    "description": "View detailed analysis button text"
+  },
+  "awayTime": "Away time",
+  "@awayTime": {
+    "description": "Away time label"
+  },
+  "last24HoursActivity": "Last 24 hours activity breakdown",
+  "@last24HoursActivity": {
+    "description": "Last 24 hours activity breakdown subtitle"
+  },
+  "all": "All",
+  "@all": {
+    "description": "All filter button"
+  },
+  "aggression": "Aggression",
+  "@aggression": {
+    "description": "Aggression filter button"
+  },
+  "absent": "Absent",
+  "@absent": {
+    "description": "Absent filter button"
+  },
+  "idle": "Idle",
+  "@idle": {
+    "description": "Idle filter button"
+  },
+  "last24HoursDetailedActivity": "Last 24 hours Detailed Activity Analysis",
+  "@last24HoursDetailedActivity": {
+    "description": "Last 24 hours detailed activity analysis subtitle"
+  },
+  "export": "Export",
+  "@export": {
+    "description": "Export button text"
+  },
+  "eventTimeSegments": "Event Time Segments",
+  "@eventTimeSegments": {
+    "description": "Event time segments section title"
+  },
+  "timeRange": "Time Range",
+  "@timeRange": {
+    "description": "Time range table header"
+  },
+  "peak": "Peak",
+  "@peak": {
+    "description": "Peak time label"
+  },
+  "eventTimeSegments": "Event Time Segments",
+  "@eventTimeSegments": {
+    "description": "Event time segments screen title"
+  },
+  "totalEvents": "Total Events",
+  "@totalEvents": {
+    "description": "Total events chart title"
+  },
+  "harassment": "Harassment",
+  "@harassment": {
+    "description": "Harassment incident type"
+  },
+  "noEvent": "No event",
+  "@noEvent": {
+    "description": "No event label"
+  },
+  "incidentAnalysis": "Incident Analysis",
+  "@incidentAnalysis": {
+    "description": "Incident analysis section title"
+  },
+  "incidentStartTime": "Incident Start Time",
+  "@incidentStartTime": {
+    "description": "Incident start time label"
+  },
+  "incidentEndTime": "Incident End Time",
+  "@incidentEndTime": {
+    "description": "Incident end time label"
+  },
+  "staffInvolve": "Staff involve",
+  "@staffInvolve": {
+    "description": "Staff involve label"
+  },
+  "duration": "Duration",
+  "@duration": {
+    "description": "Duration label"
+  },
+  "incidentType": "Incident Type",
+  "@incidentType": {
+    "description": "Incident type label"
+  },
+  "counter": "Counter",
+  "@counter": {
+    "description": "Counter zone label"
+  },
+  "timeRange": "Time Range",
+  "@timeRange": {
+    "description": "Time range table header"
+  },
+  "behaviour": "Behaviour",
+  "@behaviour": {
+    "description": "Behaviour event type"
+  },
+  "awaytime": "Awaytime",
+  "@awaytime": {
+    "description": "Awaytime event type"
+  },
+  "export": "Export",
+  "@export": {
+    "description": "Export button text"
+  },
+  "downloadingFile": "Downloading File...",
+  "@downloadingFile": {
+    "description": "Downloading file progress message"
+  },
+  "percentComplete": "{percent}% Complete",
+  "@percentComplete": {
+    "description": "Download progress percentage",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "cancelDownload": "Cancel Download",
+  "@cancelDownload": {
+    "description": "Cancel download button text"
+  },
+  "processingImage": "Processing image...",
+  "@processingImage": {
+    "description": "Processing image message"
+  },
+  "imageTooLargeSelectSmaller": "Image is too large. Please select a smaller image.",
+  "@imageTooLargeSelectSmaller": {
+    "description": "Image too large error message"
+  },
+  "profileUpdatedSuccessfully": "Profile updated successfully!",
+  "@profileUpdatedSuccessfully": {
+    "description": "Profile updated success message"
+  },
+  "failedToUpdateProfile": "Failed to update profile",
+  "@failedToUpdateProfile": {
+    "description": "Failed to update profile error message"
+  },
+  "sessionExpiredPleaseLogin": "Session expired. Please log in again.",
+  "@sessionExpiredPleaseLogin": {
+    "description": "Session expired error message"
+  },
+  "emailAlreadyInUse": "This email is already in use by another account.",
+  "@emailAlreadyInUse": {
+    "description": "Email already in use error message"
+  },
+  "phoneNumberAlreadyInUse": "This phone number is already in use by another account.",
+  "@phoneNumberAlreadyInUse": {
+    "description": "Phone number already in use error message"
+  },
+  "failedToProcessImage": "Failed to process the selected image. Please try another image.",
+  "@failedToProcessImage": {
+    "description": "Failed to process image error message"
+  },
+  "invalidSessionPleaseLogin": "Invalid session. Please log in again.",
+  "@invalidSessionPleaseLogin": {
+    "description": "Invalid session error message"
+  },
+  "failedToUpdateProfileWithError": "Failed to update profile: {error}",
+  "@failedToUpdateProfileWithError": {
+    "description": "Failed to update profile with error details",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "changePhoto": "Change Photo",
+  "@changePhoto": {
+    "description": "Change photo button text"
+  },
+  "photoLibrary": "Photo Library",
+  "@photoLibrary": {
+    "description": "Photo library option"
+  },
+  "camera": "Camera",
+  "@camera": {
+    "description": "Camera option"
+  },
+  "noUserSessionFound": "No user session found. Please log in again.",
+  "@noUserSessionFound": {
+    "description": "No user session found error message"
+  },
+  "failedToPickImage": "Failed to pick image: {error}",
+  "@failedToPickImage": {
+    "description": "Failed to pick image error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToLoadProfile": "Failed to load profile: {error}",
+  "@failedToLoadProfile": {
+    "description": "Failed to load profile error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseEnterValidEmail": "Please enter a valid email address",
+  "@pleaseEnterValidEmail": {
+    "description": "Please enter valid email validation message"
+  },
+  "pleaseEnterValidPhoneNumber": "Please enter a valid phone number",
+  "@pleaseEnterValidPhoneNumber": {
+    "description": "Please enter valid phone number validation message"
+  },
+  "displayName": "Display Name",
+  "@displayName": {
+    "description": "Display name field label"
+  },
+  "enterDisplayName": "Enter your display name",
+  "@enterDisplayName": {
+    "description": "Enter display name placeholder"
+  },
+  "saveChanges": "Save Changes",
+  "@saveChanges": {
+    "description": "Save changes button text"
+  },
+  "bio": "Bio",
+  "@bio": {
+    "description": "Bio field label"
+  },
+  "tellUsAboutYourself": "Tell us about yourself",
+  "@tellUsAboutYourself": {
+    "description": "Bio field placeholder"
+  },
+  "bioCannotExceed500Characters": "Bio cannot exceed 500 characters",
+  "@bioCannotExceed500Characters": {
+    "description": "Bio character limit validation message"
+  },
+  "doYouHaveSecretKey": "Do you have a secret key? If Yes",
+  "@doYouHaveSecretKey": {
+    "description": "Secret key modal title"
+  },
+  "enterYourSecretKey": "Enter your secret key",
+  "@enterYourSecretKey": {
+    "description": "Secret key input placeholder"
+  },
+  "pleaseEnterSecretKey": "Please enter your secret key",
+  "@pleaseEnterSecretKey": {
+    "description": "Secret key validation message"
+  }
+}

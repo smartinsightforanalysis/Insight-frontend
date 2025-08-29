@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import '../view/filtered_report_screen.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class FilterEventsPopup extends StatefulWidget {
   final String reportTitle; // Add this line
 
-  const FilterEventsPopup({Key? key, required this.reportTitle})
-    : super(key: key); // Modify constructor
+  const FilterEventsPopup({super.key, required this.reportTitle});
 
   @override
   State<FilterEventsPopup> createState() => _FilterEventsPopupState();
 }
 
 class _FilterEventsPopupState extends State<FilterEventsPopup> {
-  String? _selectedDateRange = 'Today'; // Default to Today
+  String? _selectedDateRange;
   String? _selectedZone;
   List<String> _selectedSeverities = [];
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
+    // Initialize default date range with localized "Today" if not set
+    _selectedDateRange ??= localizations.today;
     return Container(
       height: MediaQuery.of(context).size.height * 0.7, // 70% of screen height
       decoration: const BoxDecoration(
@@ -37,9 +41,9 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Filter Events',
-                  style: TextStyle(
+                Text(
+                  localizations.filterEvents,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF333333),
@@ -61,27 +65,27 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Date Range',
-                    style: TextStyle(
+                  Text(
+                    localizations.dateRange,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF333333),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildDateRangeOption('Today', 'Today'),
-                  _buildDateRangeOption('Last 7 Days', 'Last 7 Days'),
+                  _buildDateRangeOption(localizations.today, localizations.today),
+                  _buildDateRangeOption(localizations.last7Days, localizations.last7Days),
                   _buildDateRangeOption(
-                    'Custom',
-                    'Custom',
+                    localizations.custom,
+                    localizations.custom,
                     showCalendarIcon: true,
                   ),
                   const SizedBox(height: 24),
 
-                  const Text(
-                    'Zone',
-                    style: TextStyle(
+                  Text(
+                    localizations.zone,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF333333),
@@ -98,16 +102,20 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
                       child: DropdownButton<String>(
                         isExpanded: true,
                         value: _selectedZone,
-                        hint: const Text(
-                          'Select zones',
-                          style: TextStyle(color: Color(0xFF9CA3AF)),
+                        hint: Text(
+                          localizations.selectZones,
+                          style: const TextStyle(color: Color(0xFF9CA3AF)),
                         ),
                         icon: const Icon(
                           Icons.keyboard_arrow_down,
                           color: Color(0xFF9CA3AF),
                         ),
-                        items: <String>['Zone A', 'Zone B', 'Zone C', 'Zone D']
-                            .map<DropdownMenuItem<String>>((String value) {
+                        items: [
+                          localizations.zoneA,
+                          localizations.zoneB,
+                          localizations.zoneC,
+                          localizations.zoneD,
+                        ].map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(value),
@@ -124,9 +132,9 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
                   ),
                   const SizedBox(height: 24),
 
-                  const Text(
-                    'Severity',
-                    style: TextStyle(
+                  Text(
+                    localizations.severity,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF333333),
@@ -135,11 +143,11 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _buildSeverityButton('Normal'),
+                      _buildSeverityButton(localizations.normal),
                       const SizedBox(width: 8),
-                      _buildSeverityButton('Moderate'),
+                      _buildSeverityButton(localizations.moderate),
                       const SizedBox(width: 8),
-                      _buildSeverityButton('Suspicious'),
+                      _buildSeverityButton(localizations.suspicious),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -156,7 +164,7 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
                   child: OutlinedButton(
                     onPressed: () {
                       setState(() {
-                        _selectedDateRange = 'Today';
+                        _selectedDateRange = localizations.today;
                         _selectedZone = null;
                         _selectedSeverities = [];
                       });
@@ -169,9 +177,9 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      'Reset',
-                      style: TextStyle(
+                    child: Text(
+                      localizations.reset,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF4B5563),
@@ -183,15 +191,16 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context); // Close the popup
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FilteredReportScreen(
-                            reportTitle: widget.reportTitle,
-                          ),
-                        ),
-                      );
+                      // Prepare filter data
+                      final filterData = {
+                        'dateRange': _selectedDateRange,
+                        'zone': _selectedZone,
+                        'severities': _selectedSeverities,
+                        'startDate': _startDate,
+                        'endDate': _endDate,
+                      };
+
+                      Navigator.pop(context, filterData); // Close popup and return filter data
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF209A9F),
@@ -200,9 +209,9 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      'Apply',
-                      style: TextStyle(
+                    child: Text(
+                      localizations.apply,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -223,11 +232,12 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
     String value, {
     bool showCalendarIcon = false,
   }) {
+    final localizations = AppLocalizations.of(context)!;
     final bool isSelected;
-    if (value == 'Custom') {
+    if (value == localizations.custom) {
       isSelected =
-          _selectedDateRange != 'Today' &&
-          _selectedDateRange != 'Last 7 Days' &&
+          _selectedDateRange != localizations.today &&
+          _selectedDateRange != localizations.last7Days &&
           _selectedDateRange != null;
     } else {
       isSelected = _selectedDateRange == value;
@@ -297,6 +307,8 @@ class _FilterEventsPopupState extends State<FilterEventsPopup> {
 
     if (picked != null) {
       setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
         _selectedDateRange =
             '${picked.start.day}/${picked.start.month}/${picked.start.year} - ${picked.end.day}/${picked.end.month}/${picked.end.year}';
       });

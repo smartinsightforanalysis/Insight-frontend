@@ -46,6 +46,10 @@ dependencies:
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.1
   google_sign_in: ^6.2.1
+  provider: ^6.1.2
+  path_provider: ^2.1.4
+  permission_handler: ^11.3.1
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +72,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Enable localization generation
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   assets:
@@ -96,3 +103,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/appicon.png"
+  adaptive_icon_background: "#ffffff" # You can change this to any color or an image path
+  adaptive_icon_foreground: "assets/appicon.png"
+  remove_alpha_ios: true

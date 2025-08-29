@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
+import '../services/ai_api_service.dart';
 
 class StaffPerformanceChart extends StatefulWidget {
   final String title;
   final List<int> data;
-  final List<String> avatars;
 
   const StaffPerformanceChart({
     Key? key,
     required this.title,
     required this.data,
-    required this.avatars,
   }) : super(key: key);
 
   @override
@@ -17,7 +17,72 @@ class StaffPerformanceChart extends StatefulWidget {
 }
 
 class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
+  final AiApiService _aiApiService = AiApiService();
   int _selectedIndex = 0; // 0: D, 1: W, 2: M
+  List<int> _apiData = [];
+  List<String> _employeeNames = [];
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStaffPerformanceData();
+  }
+
+  Future<void> _loadStaffPerformanceData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      final period = _selectedIndex == 0 ? '1d' : _selectedIndex == 1 ? '7d' : '30d';
+
+      final response = await _aiApiService.getCompareStaffChart(
+        metric: 'productivity',
+        chartType: 'bar',
+        period: period,
+      );
+
+      if (response['data'] != null && response['data'] is List) {
+        final data = List<Map<String, dynamic>>.from(response['data']);
+        final chartData = data.map((item) {
+          final score = item['score'] ?? 0;
+          return (score is num) ? score.round().clamp(0, 100) : 0;
+        }).toList();
+
+        final employeeNames = data.map((item) {
+          return item['employee']?.toString() ?? 'Unknown';
+        }).toList();
+
+        setState(() {
+          _apiData = chartData.isNotEmpty ? chartData : [0, 0, 0, 0, 0, 0, 0];
+          _employeeNames = employeeNames;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _apiData = [0, 0, 0, 0, 0, 0, 0]; // Fallback data
+          _employeeNames = [];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load performance data';
+        _apiData = [0, 0, 0, 0, 0, 0, 0]; // Fallback data
+        _employeeNames = [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<int> get _currentData {
+    return _apiData.isNotEmpty ? _apiData : widget.data;
+  }
+
+
 
   // Responsive helper methods
   double _getResponsiveChartHeight(BuildContext context) {
@@ -42,16 +107,7 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
     }
   }
 
-  double _getResponsiveAvatarRadius(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < 360) {
-      return 10.0;
-    } else if (screenWidth < 400) {
-      return 12.0;
-    } else {
-      return 14.5;
-    }
-  }
+
 
   double _getResponsiveSpacing(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -79,7 +135,6 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
   Widget build(BuildContext context) {
     final chartHeight = _getResponsiveChartHeight(context);
     final barWidth = _getResponsiveBarWidth(context);
-    final avatarRadius = _getResponsiveAvatarRadius(context);
     final spacing = _getResponsiveSpacing(context);
     final titleFontSize = _getResponsiveTitleFontSize(context);
 
@@ -104,7 +159,7 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.title,
+                AppLocalizations.of(context)?.staffPerformance ?? widget.title,
                 style: TextStyle(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.w700,
@@ -112,7 +167,10 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: spacing - 2, vertical: 4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing - 2,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF4F6FA),
                   borderRadius: BorderRadius.circular(16),
@@ -174,7 +232,10 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
                             children: [
                               // 75 line - at center of 75 label
                               Positioned(
-                                top: (chartHeight / 5) + (chartHeight / 10) - 0.5,
+                                top:
+                                    (chartHeight / 5) +
+                                    (chartHeight / 10) -
+                                    0.5,
                                 left: 0,
                                 right: 0,
                                 child: Container(
@@ -185,7 +246,10 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
                               ),
                               // 50 line - at center of 50 label
                               Positioned(
-                                top: (chartHeight / 5) * 2 + (chartHeight / 10) - 0.5,
+                                top:
+                                    (chartHeight / 5) * 2 +
+                                    (chartHeight / 10) -
+                                    0.5,
                                 left: 0,
                                 right: 0,
                                 child: Container(
@@ -196,7 +260,10 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
                               ),
                               // 25 line - at center of 25 label
                               Positioned(
-                                top: (chartHeight / 5) * 3 + (chartHeight / 10) - 0.5,
+                                top:
+                                    (chartHeight / 5) * 3 +
+                                    (chartHeight / 10) -
+                                    0.5,
                                 left: 0,
                                 right: 0,
                                 child: Container(
@@ -207,7 +274,10 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
                               ),
                               // 0 line - at center of 0 label
                               Positioned(
-                                top: (chartHeight / 5) * 4 + (chartHeight / 10) - 0.5,
+                                top:
+                                    (chartHeight / 5) * 4 +
+                                    (chartHeight / 10) -
+                                    0.5,
                                 left: 0,
                                 right: 0,
                                 child: Container(
@@ -221,20 +291,26 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
 
                           // Bars - positioned to start from the 0 horizontal line
                           Positioned(
-                            bottom: (chartHeight / 10) - 0.5, // Start from 0 line position
+                            bottom:
+                                (chartHeight / 10) -
+                                0.5, // Start from 0 line position
                             left: 0,
                             right: 0,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.end,
-                              children: List.generate(widget.data.length, (i) {
+                              children: List.generate(_currentData.length, (i) {
                                 // Calculate bar height as percentage of available space above 0 line
                                 // Available space from 0 line to top: (chartHeight / 5) * 4 + (chartHeight / 10)
-                                final double availableHeight = (chartHeight / 5) * 4 + (chartHeight / 10);
-                                final double barHeight = (widget.data[i] / 100.0) * availableHeight;
+                                final double availableHeight =
+                                    (chartHeight / 5) * 4 + (chartHeight / 10);
+                                final double barHeight =
+                                    (_currentData[i] / 100.0) * availableHeight;
 
                                 return Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: spacing / 2),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: spacing / 2,
+                                  ),
                                   child: Container(
                                     width: barWidth,
                                     height: barHeight,
@@ -253,24 +329,11 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
                         ],
                       ),
                     ),
-
-                    // Avatars row
-                    SizedBox(height: spacing),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(widget.avatars.length, (i) {
-                        return CircleAvatar(
-                          radius: avatarRadius,
-                          backgroundImage: AssetImage(widget.avatars[i]),
-                        );
-                      }),
-                    ),
                   ],
                 ),
               ),
             ],
           ),
-
         ],
       ),
     );
@@ -284,6 +347,7 @@ class _StaffPerformanceChartState extends State<StaffPerformanceChart> {
         setState(() {
           _selectedIndex = idx;
         });
+        _loadStaffPerformanceData();
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:insight/view/add_new_branch_screen.dart';
 import '../services/api_service.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class ManageBranchScreen extends StatefulWidget {
   const ManageBranchScreen({super.key});
@@ -44,9 +45,7 @@ class _ManageBranchScreenState extends State<ManageBranchScreen> {
   Future<void> _navigateToAddBranch() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const AddNewBranchScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const AddNewBranchScreen()),
     );
 
     // If a branch was successfully added, refresh the list
@@ -57,6 +56,8 @@ class _ManageBranchScreenState extends State<ManageBranchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
@@ -64,8 +65,8 @@ class _ManageBranchScreenState extends State<ManageBranchScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Manage Branch',
+        title: Text(
+          localizations?.manageBranch ?? 'Manage Branch',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
@@ -80,96 +81,94 @@ class _ManageBranchScreenState extends State<ManageBranchScreen> {
         padding: const EdgeInsets.all(16.0),
         child: _isLoading
             ? const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF209A9F),
-                ),
+                child: CircularProgressIndicator(color: Color(0xFF209A9F)),
               )
             : _errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Error: $_errorMessage',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadBranches,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF209A9F),
-                          ),
-                          child: const Text(
-                            'Retry',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.grey[400],
                     ),
-                  )
-                : _branches.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.business_outlined,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'No branches found',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Add your first branch to get started',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _loadBranches,
-                        color: const Color(0xFF209A9F),
-                        child: ListView.separated(
-                          itemCount: _branches.length,
-                          separatorBuilder: (context, index) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final branch = _branches[index];
-                            return BranchCard(
-                              name: branch['branchName'] ?? 'Unknown',
-                              location: branch['branchAddress'] ?? 'Unknown Address',
-                            );
-                          },
-                        ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error: $_errorMessage',
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadBranches,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF209A9F),
                       ),
+                      child: Text(
+                        localizations?.retry ?? 'Retry',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : _branches.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.business_outlined,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      localizations?.noBranchesFound ?? 'No branches found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      localizations?.addFirstBranch ??
+                          'Add your first branch to get started',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _loadBranches,
+                color: const Color(0xFF209A9F),
+                child: ListView.separated(
+                  itemCount: _branches.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final branch = _branches[index];
+                    return BranchCard(
+                      name:
+                          branch['branchName'] ??
+                          (localizations?.unknownBranch ?? 'Unknown'),
+                      location:
+                          branch['branchAddress'] ??
+                          (localizations?.unknownAddress ?? 'Unknown Address'),
+                    );
+                  },
+                ),
+              ),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
         child: ElevatedButton.icon(
           onPressed: _navigateToAddBranch,
           icon: const Icon(Icons.add, color: Colors.white, size: 24.0),
-          label: const Text(
-            'Add New Branch',
+          label: Text(
+            localizations?.addNewBranch ?? 'Add New Branch',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

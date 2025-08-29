@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class FilteredReportScreen extends StatelessWidget {
   final String reportTitle; // e.g., "Incident Report"
 
-  const FilteredReportScreen({Key? key, required this.reportTitle})
-    : super(key: key);
+  const FilteredReportScreen({super.key, required this.reportTitle});
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -58,9 +60,9 @@ class FilteredReportScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'No Data Found',
-              style: TextStyle(
+            Text(
+              localizations.noDataAvailable,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF1F2937),
@@ -88,9 +90,9 @@ class FilteredReportScreen extends StatelessWidget {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
-                'Reset Filters',
-                style: TextStyle(
+              child: Text(
+                localizations.reset,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF209A9F),

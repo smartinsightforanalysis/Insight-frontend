@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/user_session.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class AddNewBranchScreen extends StatefulWidget {
   const AddNewBranchScreen({super.key});
@@ -43,9 +44,13 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
       );
 
       if (mounted) {
+        final localizations = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Branch added successfully!'),
+          SnackBar(
+            content: Text(
+              localizations?.branchAddedSuccessfully ??
+                  'Branch added successfully!',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -55,7 +60,9 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString().replaceFirst('Exception: ', '')}'),
+            content: Text(
+              'Error: ${e.toString().replaceFirst('Exception: ', '')}',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -71,6 +78,8 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
@@ -78,8 +87,8 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Add New Branch',
+        title: Text(
+          localizations?.addNewBranch ?? 'Add New Branch',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
@@ -87,10 +96,7 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
         centerTitle: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.grey.shade200,
-            height: 1.0,
-          ),
+          child: Container(color: Colors.grey.shade200, height: 1.0),
         ),
       ),
       body: Padding(
@@ -101,15 +107,18 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               RichText(
-                text: const TextSpan(
+                text: TextSpan(
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF374151),
                     fontSize: 14.0,
                   ),
                   children: [
-                    TextSpan(text: 'Branch Name'),
-                    TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+                    TextSpan(text: localizations?.branchName ?? 'Branch Name'),
+                    TextSpan(
+                      text: ' *',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ],
                 ),
               ),
@@ -118,12 +127,14 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
                 controller: _branchNameController,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Branch name is required';
+                    return localizations?.branchNameRequired ??
+                        'Branch name is required';
                   }
                   return null;
                 },
                 decoration: InputDecoration(
-                  hintText: 'Enter branch name',
+                  hintText:
+                      localizations?.enterBranchName ?? 'Enter branch name',
                   hintStyle: const TextStyle(color: Color(0xFFADAEBC)),
                   filled: true,
                   fillColor: Colors.white,
@@ -139,15 +150,20 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
               ),
               const SizedBox(height: 16.0),
               RichText(
-                text: const TextSpan(
+                text: TextSpan(
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF374151),
                     fontSize: 14.0,
                   ),
                   children: [
-                    TextSpan(text: 'Branch Address'),
-                    TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+                    TextSpan(
+                      text: localizations?.branchAddress ?? 'Branch Address',
+                    ),
+                    TextSpan(
+                      text: ' *',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ],
                 ),
               ),
@@ -156,12 +172,15 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
                 controller: _branchAddressController,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Branch address is required';
+                    return localizations?.branchAddressRequired ??
+                        'Branch address is required';
                   }
                   return null;
                 },
                 decoration: InputDecoration(
-                  hintText: 'Enter branch address',
+                  hintText:
+                      localizations?.enterBranchAddress ??
+                      'Enter branch address',
                   hintStyle: const TextStyle(color: Color(0xFFADAEBC)),
                   filled: true,
                   fillColor: Colors.white,
@@ -200,8 +219,8 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
                     strokeWidth: 2,
                   ),
                 )
-              : const Text(
-                  'Add Branch',
+              : Text(
+                  localizations?.addBranch ?? 'Add Branch',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -212,4 +231,4 @@ class _AddNewBranchScreenState extends State<AddNewBranchScreen> {
       ),
     );
   }
-} 
+}

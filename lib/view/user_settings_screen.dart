@@ -11,7 +11,11 @@ import 'package:insight/widgets/bottom_bar.dart';
 import 'package:insight/view/login.dart';
 import 'package:insight/services/user_session.dart';
 import 'package:insight/services/api_service.dart';
+import 'package:insight/services/ai_api_service.dart';
 import 'package:insight/utils/image_utils.dart';
+import 'package:insight/l10n/app_localizations.dart';
+import 'package:insight/widgets/language_switcher_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserSettingsScreen extends StatefulWidget {
   final String userRole;
@@ -75,7 +79,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                   const SizedBox(height: 24),
                   const _ManageSection(),
                   const SizedBox(height: 24),
-                  const _AiAlertSensitivitySection(),
+                  _AiAlertSensitivitySection(),
                   const SizedBox(height: 24),
                 ],
                 const _PrivacyAndSecuritySection(),
@@ -213,7 +217,7 @@ class _UserProfileSectionState extends State<_UserProfileSection> {
     if (_email != null && _email!.isNotEmpty) {
       return _email!;
     }
-    return 'No email set';
+    return AppLocalizations.of(context)?.noEmailSet ?? 'No email set';
   }
 
   @override
@@ -279,9 +283,9 @@ class _UserProfileSectionState extends State<_UserProfileSection> {
                   const SizedBox(height: 22),
                   Row(
                     children: [
-                      const Text(
-                        'Edit Profile',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)?.editProfile ?? 'Edit Profile',
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Color(0xFF374151),
                         ),
@@ -301,15 +305,16 @@ class _UserProfileSectionState extends State<_UserProfileSection> {
   }
 
   String _getRoleDisplayName(String role) {
+    final localizations = AppLocalizations.of(context);
     switch (role.toLowerCase()) {
       case 'auditor':
-        return 'Auditor';
+        return localizations?.auditor ?? 'Auditor';
       case 'supervisor':
-        return 'Supervisor';
+        return localizations?.supervisor ?? 'Supervisor';
       case 'admin':
-        return 'Admin';
+        return localizations?.admin ?? 'Admin';
       default:
-        return 'User';
+        return localizations?.user ?? 'User';
     }
   }
 }
@@ -330,28 +335,29 @@ class _NotificationPreferencesSectionState
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return _buildSection(
       context,
-      title: 'Notification Preferences',
+      title: localizations?.notificationPreferences ?? 'Notification Preferences',
       child: Column(
         children: [
           _buildSwitchTile(
-            title: 'Harassment Alerts',
-            subtitle: 'Receive alerts for potential harassment incidents',
+            title: localizations?.harassmentAlerts ?? 'Harassment Alerts',
+            subtitle: localizations?.harassmentAlertsSubtitle ?? 'Receive alerts for potential harassment incidents',
             value: harassmentAlerts,
             onChanged: (val) => setState(() => harassmentAlerts = val),
           ),
           const SizedBox(height: 16),
           _buildSwitchTile(
-            title: 'Inactivity Notifications',
-            subtitle: 'Receive notifications when no activity is detected',
+            title: localizations?.inactivityNotifications ?? 'Inactivity Notifications',
+            subtitle: localizations?.inactivityNotificationsSubtitle ?? 'Receive notifications when no activity is detected',
             value: inactivityNotifications,
             onChanged: (val) => setState(() => inactivityNotifications = val),
           ),
           const SizedBox(height: 16),
           _buildSwitchTile(
-            title: 'Mobile Usage Alerts',
-            subtitle: 'Receive alerts when unusual mobile usage is detected',
+            title: localizations?.mobileUsageAlerts ?? 'Mobile Usage Alerts',
+            subtitle: localizations?.mobileUsageAlertsSubtitle ?? 'Receive alerts when unusual mobile usage is detected',
             value: mobileUsageAlerts,
             onChanged: (val) => setState(() => mobileUsageAlerts = val),
           ),
@@ -373,23 +379,24 @@ class _ReportSettingsSectionState extends State<_ReportSettingsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return _buildSection(
       context,
-      title: 'Report Settings',
+      title: localizations?.reportSettings ?? 'Report Settings',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: Text('Auto-download weekly reports'),
+            title: Text(localizations?.autoDownloadWeeklyReports ?? 'Auto-download weekly reports'),
             subtitle: Text(
-              'Automatically download weekly reports in your preferred format.',
+              localizations?.autoDownloadWeeklyReportsSubtitle ?? 'Automatically download weekly reports in your preferred format.',
               style: const TextStyle(color: Color(0xFF6B7280)),
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            'Report Format',
+            localizations?.reportFormat ?? 'Report Format',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             textAlign: TextAlign.start,
           ),
@@ -418,9 +425,10 @@ class _ReportSettingsSectionState extends State<_ReportSettingsSection> {
                 reportFormat = newValue!;
               });
             },
-            items: <String>['PDF', 'Excel'].map<DropdownMenuItem<String>>((
-              String value,
-            ) {
+            items: <String>[
+              localizations?.pdf ?? 'PDF',
+              localizations?.excel ?? 'Excel'
+            ].map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(value: value, child: Text(value));
             }).toList(),
           ),
@@ -435,12 +443,13 @@ class _ManageSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Column(
       children: [
         _buildManageTile(
           context,
           iconPath: 'assets/branch.svg',
-          title: 'Manage Branches',
+          title: localizations?.manageBranches ?? 'Manage Branches',
           onTap: () {
             Navigator.push(
               context,
@@ -454,7 +463,7 @@ class _ManageSection extends StatelessWidget {
         _buildManageTile(
           context,
           iconPath: 'assets/manage.svg',
-          title: 'Manage Users',
+          title: localizations?.manageUsers ?? 'Manage Users',
           onTap: () {
             Navigator.push(
               context,
@@ -479,13 +488,109 @@ class _AiAlertSensitivitySection extends StatefulWidget {
 
 class _AiAlertSensitivitySectionState
     extends State<_AiAlertSensitivitySection> {
-  double sensitivity = 0.2;
+  final AiApiService _aiApiService = AiApiService();
+  double sensitivity = 1.0; // 0=low, 1=medium, 2=high
+  bool _isLoading = false;
+  static const String _prefsKey = 'ai_sensitivity_level';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSensitivity();
+  }
+
+  Future<void> _initializeSensitivity() async {
+    // Load locally saved level first for instant UI, then refresh from server
+    final prefs = await SharedPreferences.getInstance();
+    final savedLevel = prefs.getString(_prefsKey);
+    if (savedLevel != null && mounted) {
+      setState(() => sensitivity = _levelToIndex(savedLevel));
+    }
+    await _fetchCurrentSensitivity();
+  }
+
+  Future<void> _fetchCurrentSensitivity() async {
+    setState(() => _isLoading = true);
+    try {
+      final token = UserSession.instance.currentToken;
+      final response = await _aiApiService.getAiSensitivity(token: token);
+
+      final String? level = _extractLevelFromResponse(response);
+
+      if (level != null) {
+        setState(() {
+          sensitivity = _levelToIndex(level);
+        });
+        // Persist locally
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_prefsKey, level);
+      }
+    } catch (e) {
+      // Keep default on failure
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  String? _extractLevelFromResponse(Map<String, dynamic> response) {
+    // Preferred structure: { ai_sensitivity_settings: { sensitivity_level: "low" } }
+    final settings = response['ai_sensitivity_settings'];
+    if (settings is Map && settings['sensitivity_level'] is String) {
+      return (settings['sensitivity_level'] as String).toLowerCase();
+    }
+    // Alternate structures fallbacks
+    if (response['level'] is String) return (response['level'] as String).toLowerCase();
+    if (response['sensitivity'] is String) return (response['sensitivity'] as String).toLowerCase();
+    final data = response['data'];
+    if (data is Map && data['level'] is String) return (data['level'] as String).toLowerCase();
+    if (data is String) return data.toLowerCase();
+    return null;
+  }
+
+  double _levelToIndex(String level) {
+    switch (level) {
+      case 'low':
+        return 0.0;
+      case 'high':
+        return 2.0;
+      case 'medium':
+      default:
+        return 1.0;
+    }
+  }
+
+  String _indexToLevel(double index) {
+    final int i = index.round().clamp(0, 2);
+    if (i == 0) return 'low';
+    if (i == 2) return 'high';
+    return 'medium';
+  }
+
+  Future<void> _updateSensitivity(double newIndex) async {
+    final String level = _indexToLevel(newIndex);
+    try {
+      final token = UserSession.instance.currentToken;
+      await _aiApiService.setAiSensitivityLevel(level, token: token);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefsKey, level);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('AI sensitivity set to ${level[0].toUpperCase()}${level.substring(1)}')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update sensitivity')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return _buildSection(
       context,
-      title: 'AI Alert Sensitivity',
+      title: localizations?.aiAlertSensitivity ?? 'AI Alert Sensitivity',
       child: Column(
         children: [
           SliderTheme(
@@ -502,19 +607,28 @@ class _AiAlertSensitivitySectionState
             ),
             child: Slider(
               value: sensitivity,
-              onChanged: (val) => setState(() => sensitivity = val),
+              min: 0,
+              max: 2,
               divisions: 2,
+              onChanged: (val) => setState(() => sensitivity = val.roundToDouble()),
+              onChangeEnd: (val) {
+                final snapped = val.roundToDouble().clamp(0.0, 2.0);
+                setState(() => sensitivity = snapped);
+                _updateSensitivity(snapped);
+              },
             ),
           ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Low', style: const TextStyle(color: Color(0xFF6B7280))),
-              Text('Medium', style: const TextStyle(color: Color(0xFF6B7280))),
-              Text('High', style: const TextStyle(color: Color(0xFF6B7280))),
+              Text(localizations?.low ?? 'Low', style: const TextStyle(color: Color(0xFF6B7280))),
+              Text(localizations?.medium ?? 'Medium', style: const TextStyle(color: Color(0xFF6B7280))),
+              Text(localizations?.high ?? 'High', style: const TextStyle(color: Color(0xFF6B7280))),
             ],
           ),
+          if (_isLoading) const SizedBox(height: 12),
+          if (_isLoading) const LinearProgressIndicator(minHeight: 2),
         ],
       ),
     );
@@ -526,34 +640,41 @@ class _PrivacyAndSecuritySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return _buildSection(
       context,
-      title: 'Privacy and Security',
+      title: localizations?.privacyAndSecurity ?? 'Privacy and Security',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildPrivacyItem(
             context,
             iconPath: 'assets/privacy.svg',
-            title: 'Privacy Settings',
+            title: localizations?.privacySettings ?? 'Privacy Settings',
             onTap: () {},
           ),
           const SizedBox(height: 8),
           _buildPrivacyItem(
             context,
             iconPath: 'assets/security.svg',
-            title: 'Security Settings',
+            title: localizations?.securitySettings ?? 'Security Settings',
             onTap: () {},
           ),
           const SizedBox(height: 8),
           _buildPrivacyItem(
             context,
             iconPath: 'assets/lock.svg',
-            title: 'Two-Factor Authentication',
+            title: localizations?.twoFactorAuthentication ?? 'Two-Factor Authentication',
             onTap: () {},
           ),
           const SizedBox(height: 24),
-          Align(alignment: Alignment.centerLeft, child: _LogoutButton()),
+          Row(
+            children: [
+              const _LogoutButton(),
+              const SizedBox(width: 12),
+              const LanguageSwitcherButton(),
+            ],
+          ),
         ],
       ),
     );
@@ -565,6 +686,7 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return OutlinedButton.icon(
       onPressed: () async {
         // Clear user session
@@ -580,9 +702,9 @@ class _LogoutButton extends StatelessWidget {
         }
       },
       icon: SvgPicture.asset('assets/logout.svg'),
-      label: const Text(
-        'Log Out',
-        style: TextStyle(color: Color(0xFF209A9F), fontWeight: FontWeight.bold),
+      label: Text(
+        localizations?.logOut ?? 'Log Out',
+        style: const TextStyle(color: Color(0xFF209A9F), fontWeight: FontWeight.bold),
       ),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),

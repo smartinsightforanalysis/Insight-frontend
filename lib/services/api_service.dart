@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String _baseUrl =
-      "http://10.0.2.2:3000/api"; // Replace with your backend URL
+  final String _baseUrl = "http://147.93.152.203:3000/api";
+  // 147.93.152.203:3000
 
   Future<Map<String, dynamic>> registerUser(
     String name,
@@ -77,7 +77,7 @@ class ApiService {
     String password,
   ) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/auth/reset-password'),
+      Uri.parse('$_baseUrl/reset-password'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'email': email, 'password': password}),
     );
@@ -90,7 +90,7 @@ class ApiService {
     String token,
   ) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/auth/change-password'),
+      Uri.parse('$_baseUrl/change-password'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

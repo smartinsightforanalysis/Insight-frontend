@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/branch_switch_popup.dart';
+import '../view/notification_screen.dart';
 
 class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -26,6 +28,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return AppBar(
       automaticallyImplyLeading: showBackButton,
       toolbarHeight: height,
@@ -34,14 +37,14 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            "${localizations?.contactSupport ?? 'Please contact Support for Company Details'}\n056-3015516",
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 24,
+              fontSize: 14,
             ),
           ),
-          
+
           Row(
             children: [
               SvgPicture.asset(
@@ -64,10 +67,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
               IconButton(
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 0,
-                  minHeight: 0,
-                ),
+                constraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                 icon: SvgPicture.asset(
                   'assets/direction-down.svg',
                   width: 13,
@@ -93,16 +93,26 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         Container(
           margin: const EdgeInsets.only(right: 16),
-          child: CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.white,
-            child: SvgPicture.asset(
-              'assets/bell.svg',
-              width: 21,
-              height: 20,
-              colorFilter: const ColorFilter.mode(
-                Color(0xFF434343),
-                BlendMode.srcIn,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationScreen(),
+                ),
+              );
+            },
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.white,
+              child: SvgPicture.asset(
+                'assets/bell.svg',
+                width: 21,
+                height: 20,
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF434343),
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ),
@@ -120,4 +130,4 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(height);
-} 
+}

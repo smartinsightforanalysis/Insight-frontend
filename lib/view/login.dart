@@ -6,6 +6,7 @@ import 'package:insight/services/firebase_auth_service.dart';
 import 'package:insight/services/simple_google_auth.dart';
 import '../widgets/forgot_password_modal.dart';
 import '../widgets/save_info_modal.dart';
+import '../widgets/secret_key_modal.dart';
 import 'onboarding_screen.dart';
 import 'signup.dart';
 import 'admin_dashboard.dart';
@@ -46,6 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       return;
     }
+
     final dashboard = AdminDashboard(userRole: _selectedRole!);
     Navigator.pushReplacement(
       context,
@@ -290,7 +292,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String>(
-                              hint: Text(
+                              hint: const Text(
                                 'Select your role',
                                 style: TextStyle(color: Color(0xFFADAEBC)),
                               ),
@@ -322,16 +324,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                 filled: true,
                                 fillColor: Colors.white,
                               ),
-                              items: const [
-                                DropdownMenuItem<String>(
+                              items: [
+                                const DropdownMenuItem<String>(
                                   value: 'admin',
                                   child: Text('Admin'),
                                 ),
-                                DropdownMenuItem<String>(
+                                const DropdownMenuItem<String>(
                                   value: 'supervisor',
                                   child: Text('Supervisor'),
                                 ),
-                                DropdownMenuItem<String>(
+                                const DropdownMenuItem<String>(
                                   value: 'auditor',
                                   child: Text('Auditor'),
                                 ),
@@ -534,8 +536,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 24),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Expanded(
+                              children: [
+                                const Expanded(
                                   flex: 2,
                                   child: Divider(
                                     thickness: 1,
@@ -543,10 +545,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 24.0,
                                   ),
-                                  child: Text(
+                                  child: const Text(
                                     'or',
                                     style: TextStyle(
                                       color: Color(0xFF9CA3AF),
@@ -554,7 +556,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                 ),
-                                Expanded(
+                                const Expanded(
                                   flex: 2,
                                   child: Divider(
                                     thickness: 1,
@@ -674,6 +676,33 @@ class _LoginScreenState extends State<LoginScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const SaveInfoModal(),
+    );
+  }
+
+  void _showSecretKeyModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SecretKeyModal(
+        onSecretKeySubmitted: (secretKey) {
+          if (secretKey != null) {
+            // Handle secret key submission
+            print('Secret key entered: $secretKey');
+            // You can add your secret key validation logic here
+          } else {
+            // User chose NO or didn't enter a key
+            print('No secret key provided');
+          }
+
+          // Navigate to dashboard after handling secret key
+          final dashboard = AdminDashboard(userRole: _selectedRole!);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => dashboard),
+          );
+        },
+      ),
     );
   }
 }

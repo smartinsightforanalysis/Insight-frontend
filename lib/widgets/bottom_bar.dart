@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../l10n/app_localizations.dart';
 
 class BottomBar extends StatelessWidget {
   final int currentIndex;
@@ -15,6 +16,7 @@ class BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return SafeArea(
       bottom: true,
       left: false,
@@ -45,12 +47,15 @@ class BottomBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildNavItem('assets/home.svg', 'Dashboard', 0),
-                  _buildNavItem('assets/report.svg', 'Reports', 1),
-                  _buildNavItem('assets/staff.svg', 'Staff', 2),
+                  _buildNavItem(context, 'assets/home.svg', localizations?.dashboard ?? 'Dashboard', 0),
+                  _buildNavItem(context, 'assets/report.svg', localizations?.reports ?? 'Reports', 1),
+                  _buildNavItem(context, 'assets/staff.svg', localizations?.staff ?? 'Staff', 2),
                   _buildNavItem(
+                    context,
                     'assets/users.svg',
-                    userRole.toLowerCase() == 'admin' ? 'Users' : 'Settings',
+                    userRole.toLowerCase() == 'admin' 
+                        ? (localizations?.users ?? 'Users') 
+                        : (localizations?.settings ?? 'Settings'),
                     3,
                   ),
                 ],
@@ -62,7 +67,7 @@ class BottomBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(String iconPath, String label, int index) {
+  Widget _buildNavItem(BuildContext context, String iconPath, String label, int index) {
     final bool isSelected = currentIndex == index;
     final Color itemColor = isSelected ? const Color(0xFF00A39E) : const Color(0xFF9CA3AF);
 

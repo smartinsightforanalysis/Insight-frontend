@@ -263,7 +263,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                             const SizedBox(height: 8),
                             DropdownButtonFormField<String>(
-                              hint: Text(
+                              hint: const Text(
                                 'Select your role',
                                 style: TextStyle(color: Color(0xFFADAEBC)),
                               ),
@@ -295,16 +295,16 @@ class _SignupScreenState extends State<SignupScreen> {
                                 filled: true,
                                 fillColor: Colors.white,
                               ),
-                              items: const [
-                                DropdownMenuItem<String>(
+                              items: [
+                                const DropdownMenuItem<String>(
                                   value: 'admin',
                                   child: Text('Admin'),
                                 ),
-                                DropdownMenuItem<String>(
+                                const DropdownMenuItem<String>(
                                   value: 'supervisor',
                                   child: Text('Supervisor'),
                                 ),
-                                DropdownMenuItem<String>(
+                                const DropdownMenuItem<String>(
                                   value: 'auditor',
                                   child: Text('Auditor'),
                                 ),
@@ -643,17 +643,14 @@ class _SignupScreenState extends State<SignupScreen> {
                                     padding: const EdgeInsets.only(top: 14.0),
                                     child: RichText(
                                       text: TextSpan(
-                                        text: 'I accept the ',
+                                        text:
+                                            'I accept the terms and Privacy policy',
                                         style: const TextStyle(
                                           fontSize: 14,
                                           color: Color(0xFF434343),
                                           fontWeight: FontWeight.bold,
                                         ),
                                         children: <TextSpan>[
-                                          TextSpan(
-                                            text: 'terms and Privacy policy',
-                                            style: const TextStyle(),
-                                          ),
                                           TextSpan(text: '  '),
                                           TextSpan(
                                             text: 'Read',
@@ -705,8 +702,8 @@ class _SignupScreenState extends State<SignupScreen> {
                             const SizedBox(height: 24),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Expanded(
+                              children: [
+                                const Expanded(
                                   flex: 2,
                                   child: Divider(
                                     thickness: 1,
@@ -714,10 +711,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 24.0,
                                   ),
-                                  child: Text(
+                                  child: const Text(
                                     'or',
                                     style: TextStyle(
                                       color: Color(0xFF9CA3AF),
@@ -725,7 +722,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     ),
                                   ),
                                 ),
-                                Expanded(
+                                const Expanded(
                                   flex: 2,
                                   child: Divider(
                                     thickness: 1,
@@ -772,7 +769,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   const SizedBox(width: 8),
                                   Text(
                                     _isGoogleSignUpLoading
-                                        ? 'Signing up...'
+                                        ? 'Signing in...'
                                         : 'Continue with Google',
                                     style: const TextStyle(
                                       fontSize: 18,

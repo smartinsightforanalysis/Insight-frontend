@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
 import 'package:insight/widgets/export_report_dialog.dart';
 
 class ExportReportButton extends StatelessWidget {
@@ -13,6 +14,8 @@ class ExportReportButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     // Only show for admin role users based on user preferences
     if (userRole != 'admin') {
       return const SizedBox.shrink();
@@ -35,9 +38,9 @@ class ExportReportButton extends StatelessWidget {
           elevation: 0,
         ),
         icon: const Icon(Icons.download, size: 20),
-        label: const Text(
-          'Export All Reports',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        label: Text(
+          localizations.exportAllReports,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );

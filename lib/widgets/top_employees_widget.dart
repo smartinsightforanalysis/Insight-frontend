@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class TopEmployeesWidget extends StatelessWidget {
-  const TopEmployeesWidget({Key? key}) : super(key: key);
+  final List<Map<String, dynamic>> employees;
+  final bool isLoading;
+
+  const TopEmployeesWidget({
+    Key? key,
+    required this.employees,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -10,8 +18,9 @@ class TopEmployeesWidget extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: const Text(
-            'Top 5 Employees This Week',
+          child: Text(
+            AppLocalizations.of(context)?.topEmployeesThisWeek ??
+                'Top Employees This Week',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
@@ -20,83 +29,110 @@ class TopEmployeesWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Megan Carter', 
-          'Downtown', 
-          'assets/jd.png', 
-          88, 
-          const Color(0xFF1E3A8A),
-          0.9
-        ),
-        const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Kamran Shah', 
-          'Central', 
-          'assets/sk.png', 
-          84, 
-          const Color(0xFF60A5FA),
-          0.85
-        ),
-        const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Jane Doe', 
-          'Zone 2', 
-          'assets/jane.png', 
-          82, 
-          const Color(0xFFCBD5E1),
-          0.82
-        ),
-        const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Sarah Kim', 
-          'Zone 4', 
-          'assets/sarah.png', 
-          79, 
-          const Color(0xFF9FD6A3),
-          0.78
-        ),
-        const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Linda Smith', 
-          'Central', 
-          'assets/ls.png', 
-          78, 
-          const Color(0xFFCBD5E1),
-          0.77
-        ),
+        if (isLoading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else if (employees.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text(
+                'No employee data available',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+            ),
+          )
+        else
+          ...employees.take(5).map((employee) {
+            final name = employee['name'] ?? 'Unknown';
+            final score = (employee['score'] ?? 0.0).toDouble();
+            final rank = employee['rank'] ?? 1;
+
+            // Calculate progress value (0.0 to 1.0) based on score
+            // Score range is 0 to 100
+            final progressValue = (score / 100).clamp(0.0, 1.0);
+
+            // Get color based on rank
+            final progressColor = _getColorForRank(rank);
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: _buildEmployeeCard(
+                name,
+                _getLocationForEmployee(name), // Get location based on name
+                score.toInt(),
+                progressColor,
+                progressValue,
+              ),
+            );
+          }),
       ],
     );
   }
 
+  Color _getColorForRank(int rank) {
+    switch (rank) {
+      case 1:
+        return const Color(0xFF1E3A8A); // Dark blue for #1
+      case 2:
+        return const Color(0xFF60A5FA); // Light blue for #2
+      case 3:
+        return const Color(0xFF9FD6A3); // Green for #3
+      case 4:
+        return const Color(0xFFCBD5E1); // Light gray for #4
+      case 5:
+        return const Color(0xFFCBD5E1); // Light gray for #5
+      default:
+        return const Color(0xFFCBD5E1); // Default gray
+    }
+  }
+
+  String _getLocationForEmployee(String name) {
+    // Map employee names to locations/zones
+    final lowerName = name.toLowerCase();
+    if (lowerName.contains('talha')) {
+      return 'Downtown';
+    } else if (lowerName.contains('basit')) {
+      return 'Central';
+    } else if (lowerName.contains('m..talha')) {
+      return 'Zone 2';
+    } else if (lowerName.contains('m.talha')) {
+      return 'Zone 4';
+    } else {
+      return 'Central'; // Default location
+    }
+  }
+
+
+
   Widget _buildEmployeeCard(
-      String name,
-      String location,
-      String imagePath,
-      int score,
-      Color progressColor,
-      double progressValue) {
+    String name,
+    String location,
+    int score,
+    Color progressColor,
+    double progressValue,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
       elevation: 1,
       color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Employee image
+            // Employee placeholder
             CircleAvatar(
               radius: 25,
               backgroundColor: progressColor.withOpacity(0.15),
-              child: ClipOval(
-                child: Image.asset(
-                  imagePath,
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
+              child: Icon(
+                Icons.person,
+                color: progressColor,
+                size: 30,
               ),
             ),
             const SizedBox(width: 16),

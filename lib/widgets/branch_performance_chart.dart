@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class BranchPerformanceChart extends StatefulWidget {
-  const BranchPerformanceChart({Key? key}) : super(key: key);
+  final List<Map<String, dynamic>> branches;
+  final bool isLoading;
+  final Function(String)? onPeriodChanged;
+
+  const BranchPerformanceChart({
+    Key? key,
+    this.branches = const [],
+    this.isLoading = false,
+    this.onPeriodChanged,
+  }) : super(key: key);
 
   @override
   State<BranchPerformanceChart> createState() => _BranchPerformanceChartState();
@@ -11,18 +21,41 @@ class BranchPerformanceChart extends StatefulWidget {
 class _BranchPerformanceChartState extends State<BranchPerformanceChart> {
   int _selectedIndex = 0; // 0: D, 1: W, 2: M
 
-  // Example data for D, W, M
-  final List<List<int>> _data = [
-    [50, 95, 30, 75], // D
-    [60, 80, 70, 65], // W
-    [70, 60, 80, 75], // M
-  ];
+  // Get branch names from API data
+  List<String> get _branchLabels {
+    if (widget.branches.isEmpty) {
+      return ['A', 'B', 'C', 'D']; // Fallback
+    }
+    return widget.branches
+        .map((branch) => branch['branch']?.toString() ?? 'Unknown')
+        .toList();
+  }
 
-  final List<String> _branchLabels = ['A', 'B', 'C', 'D'];
+  // Get productivity scores as percentages (0-100)
+  List<int> get _productivityScores {
+    if (widget.branches.isEmpty) {
+      return [50, 95, 30, 75]; // Fallback data
+    }
+    return widget.branches.map((branch) {
+      double score = (branch['productivity_score'] ?? 0.0).toDouble();
+      return (score * 100).round().clamp(0, 100); // Convert to percentage
+    }).toList();
+  }
+
+  // For now, use same data for D, W, M (can be enhanced later with time-based data)
+  List<List<int>> get _data {
+    final scores = _productivityScores;
+    return [
+      scores, // D
+      scores, // W
+      scores, // M
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final bars = _data[_selectedIndex];
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
@@ -51,11 +84,12 @@ class _BranchPerformanceChartState extends State<BranchPerformanceChart> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Branch Performance',
+              Text(
+                AppLocalizations.of(context)?.branchPerformance ??
+                    'Branch Performance',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                   color: Color(0xFF1C3557),
                 ),
               ),
@@ -69,9 +103,13 @@ class _BranchPerformanceChartState extends State<BranchPerformanceChart> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildToggle('D', 0),
-                    SizedBox(width: MediaQuery.of(context).size.width < 400 ? 4 : 8),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width < 400 ? 4 : 8,
+                    ),
                     _buildToggle('W', 1),
-                    SizedBox(width: MediaQuery.of(context).size.width < 400 ? 4 : 8),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width < 400 ? 4 : 8,
+                    ),
                     _buildToggle('M', 2),
                   ],
                 ),
@@ -81,152 +119,167 @@ class _BranchPerformanceChartState extends State<BranchPerformanceChart> {
           const SizedBox(height: 16),
           SizedBox(
             height: 170,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Y-axis numbers
-                SizedBox(
-                  width: 32.0, // Fixed width for Y-axis numbers
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: widget.isLoading
+                ? Center(
+                    child: CircularProgressIndicator(color: Color(0xFF16A3AC)),
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      for (var y in [100, 75, 50, 25, 0])
-                        SizedBox(
-                          height: 34,
-                          child: Text(
-                            '$y',
-                            style: TextStyle(
-                              color: Colors.grey.shade400,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Chart area with grid lines and bars only (no longer scrollable)
-                Expanded(
-                  child: Stack(
-                    children: [
-                      // Grid lines positioned to align exactly with center of Y-axis labels
-                      Stack(
-                        children: [
-                          // 75 line - at center of 75 label
-                          Positioned(
-                            top: (170 / 5) + (170 / 10) - 0.5,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              width: double.infinity,
-                              height: 1,
-                              color: Colors.grey.withOpacity(0.15),
-                            ),
-                          ),
-                          // 50 line - at center of 50 label
-                          Positioned(
-                            top: (170 / 5) * 2 + (170 / 10) - 0.5,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              width: double.infinity,
-                              height: 1,
-                              color: Colors.grey.withOpacity(0.15),
-                            ),
-                          ),
-                          // 25 line - at center of 25 label
-                          Positioned(
-                            top: (170 / 5) * 3 + (170 / 10) - 0.5,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              width: double.infinity,
-                              height: 1,
-                              color: Colors.grey.withOpacity(0.15),
-                            ),
-                          ),
-                          // 0 line - at center of 0 label
-                          Positioned(
-                            top: (170 / 5) * 4 + (170 / 10) - 0.5,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              width: double.infinity,
-                              height: 1,
-                              color: Colors.grey.withOpacity(0.15),
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Bars - positioned to start from the 0 horizontal line
-                      Positioned(
-                        bottom: (170 / 10) - 0.5, // Start from 0 line position
-                        left: 0,
-                        right: 0,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: List.generate(bars.length, (i) {
-                            // Calculate bar height as percentage of available space above 0 line
-                            // Available space from 0 line to top: (170 / 5) * 4 + (170 / 10)
-                            final double availableHeight = (170 / 5) * 4 + (170 / 10);
-                            final double barHeight = (bars[i] / 100.0) * availableHeight;
-
-                            return Expanded(
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: Container(
-                                  width: 24, // Keep a fixed width for the bar itself, let Expanded handle spacing
-                                  height: barHeight,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF16A3AC),
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(2),
-                                      topRight: Radius.circular(2),
-                                    ),
+                      // Y-axis numbers
+                      SizedBox(
+                        width: 32.0, // Fixed width for Y-axis numbers
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            for (var y in [100, 75, 50, 25, 0])
+                              SizedBox(
+                                height: 34,
+                                child: Text(
+                                  '$y',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ),
-                            );
-                          }),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Chart area with grid lines and bars only (no longer scrollable)
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            // Grid lines positioned to align exactly with center of Y-axis labels
+                            Stack(
+                              children: [
+                                // 75 line - at center of 75 label
+                                Positioned(
+                                  top: (170 / 5) + (170 / 10) - 0.5,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 1,
+                                    color: Colors.grey.withOpacity(0.15),
+                                  ),
+                                ),
+                                // 50 line - at center of 50 label
+                                Positioned(
+                                  top: (170 / 5) * 2 + (170 / 10) - 0.5,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 1,
+                                    color: Colors.grey.withOpacity(0.15),
+                                  ),
+                                ),
+                                // 25 line - at center of 25 label
+                                Positioned(
+                                  top: (170 / 5) * 3 + (170 / 10) - 0.5,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 1,
+                                    color: Colors.grey.withOpacity(0.15),
+                                  ),
+                                ),
+                                // 0 line - at center of 0 label
+                                Positioned(
+                                  top: (170 / 5) * 4 + (170 / 10) - 0.5,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 1,
+                                    color: Colors.grey.withOpacity(0.15),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Bars - positioned to start from the 0 horizontal line
+                            Positioned(
+                              bottom:
+                                  (170 / 10) -
+                                  0.5, // Start from 0 line position
+                              left: 0,
+                              right: 0,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: List.generate(bars.length, (i) {
+                                  // Calculate bar height as percentage of available space above 0 line
+                                  // Available space from 0 line to top: (170 / 5) * 4 + (170 / 10)
+                                  final double availableHeight =
+                                      (170 / 5) * 4 + (170 / 10);
+                                  final double barHeight =
+                                      (bars[i] / 100.0) * availableHeight;
+
+                                  return Expanded(
+                                    child: Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: Container(
+                                        width:
+                                            24, // Keep a fixed width for the bar itself, let Expanded handle spacing
+                                        height: barHeight,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF16A3AC),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(2),
+                                            topRight: Radius.circular(2),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
+                  ),
+          ),
+          const SizedBox(height: 16),
+          // Branch labels row (no longer scrollable)
+          if (!widget.isLoading)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 32.0,
+                ), // Match the fixed width of Y-axis numbers
+                const SizedBox(
+                  width: 8,
+                ), // Match the gap between Y-axis and bars
+                Expanded(
+                  child: Row(
+                    children: List.generate(_branchLabels.length, (i) {
+                      return Expanded(
+                        child: Center(
+                          child: SizedBox(
+                            width: 24, // Match the width of the bars
+                            child: Text(
+                              _branchLabels[i],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF6B7280),
+                              ),
+                              textAlign: TextAlign
+                                  .center, // Ensure text is centered within its SizedBox
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          // Branch labels row (no longer scrollable)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(width: 32.0), // Match the fixed width of Y-axis numbers
-              const SizedBox(width: 8), // Match the gap between Y-axis and bars
-              Expanded(
-                child: Row(
-                  children: List.generate(_branchLabels.length, (i) {
-                    return Expanded(
-                      child: Center(
-                        child: SizedBox(
-                          width: 24, // Match the width of the bars
-                          child: Text(
-                            _branchLabels[i],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF6B7280),
-                            ),
-                            textAlign: TextAlign.center, // Ensure text is centered within its SizedBox
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -238,12 +291,31 @@ class _BranchPerformanceChartState extends State<BranchPerformanceChart> {
     final double screenWidth = MediaQuery.of(context).size.width;
     // Determine if we're on a small device
     final bool isSmallDevice = screenWidth < 400;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedIndex = idx;
         });
+
+        // Call the callback with the appropriate period
+        if (widget.onPeriodChanged != null) {
+          String period;
+          switch (idx) {
+            case 0:
+              period = '1d'; // D
+              break;
+            case 1:
+              period = '7d'; // W
+              break;
+            case 2:
+              period = '30d'; // M
+              break;
+            default:
+              period = '1d';
+          }
+          widget.onPeriodChanged!(period);
+        }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -281,4 +353,4 @@ class _BranchPerformanceChartState extends State<BranchPerformanceChart> {
   void dispose() {
     super.dispose();
   }
-} 
+}

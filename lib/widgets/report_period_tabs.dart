@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class ReportPeriodTabs extends StatelessWidget {
   final String selectedPeriod;
@@ -12,6 +13,8 @@ class ReportPeriodTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -20,15 +23,15 @@ class ReportPeriodTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildPeriodTab('Daily'),
-          _buildPeriodTab('Weekly'),
-          _buildPeriodTab('Monthly'),
+          _buildPeriodTab(localizations.daily, context),
+          _buildPeriodTab(localizations.weekly, context),
+          _buildPeriodTab(localizations.monthly, context),
         ],
       ),
     );
   }
 
-  Widget _buildPeriodTab(String period) {
+  Widget _buildPeriodTab(String period, BuildContext context) {
     final isSelected = selectedPeriod == period;
     return Expanded(
       child: GestureDetector(

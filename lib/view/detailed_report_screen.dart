@@ -1,32 +1,136 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:insight/l10n/app_localizations.dart';
 import '../widgets/report_period_tabs.dart';
 import '../widgets/report_summary_cards.dart';
 import '../widgets/filter_events_popup.dart';
 import '../widgets/report_incidents_list.dart';
 import '../widgets/export_report_button.dart';
+import 'filtered_report_screen.dart';
+import '../services/ai_api_service.dart';
 
 class DetailedReportScreen extends StatefulWidget {
   final String reportTitle;
   final String userRole;
 
   const DetailedReportScreen({
-    Key? key,
+    super.key,
     required this.reportTitle,
     required this.userRole,
-  }) : super(key: key);
+  });
 
   @override
   State<DetailedReportScreen> createState() => _DetailedReportScreenState();
 }
 
 class _DetailedReportScreenState extends State<DetailedReportScreen> {
-  String _selectedPeriod = 'Daily';
+  late String _selectedPeriod;
+  Map<String, dynamic>? _activeFilters;
 
   void _onPeriodChanged(String period) {
     setState(() {
       _selectedPeriod = period;
     });
+  }
+
+
+
+  void _handleFilterData(Map<String, dynamic> filterData) async {
+    // Convert filter data to API parameters
+    String? startDate;
+    String? endDate;
+    String? zone;
+
+    // Handle date range
+    final dateRange = filterData['dateRange'] as String?;
+    final startDateObj = filterData['startDate'] as DateTime?;
+    final endDateObj = filterData['endDate'] as DateTime?;
+
+    if (startDateObj != null && endDateObj != null) {
+      startDate = startDateObj.toIso8601String().split('T')[0];
+      endDate = endDateObj.toIso8601String().split('T')[0];
+    } else if (dateRange != null) {
+      final localizations = AppLocalizations.of(context)!;
+      final now = DateTime.now();
+
+      if (dateRange == localizations.today) {
+        startDate = now.toIso8601String().split('T')[0];
+        endDate = now.toIso8601String().split('T')[0];
+      } else if (dateRange == localizations.last7Days) {
+        startDate = now.subtract(const Duration(days: 7)).toIso8601String().split('T')[0];
+        endDate = now.toIso8601String().split('T')[0];
+      }
+    }
+
+    // Handle zone
+    final selectedZone = filterData['zone'] as String?;
+    if (selectedZone != null) {
+      // Convert localized zone names to API format
+      final localizations = AppLocalizations.of(context)!;
+      if (selectedZone == localizations.zoneA) {
+        zone = 'A';
+      } else if (selectedZone == localizations.zoneB) {
+        zone = 'B';
+      } else if (selectedZone == localizations.zoneC) {
+        zone = 'C';
+      } else if (selectedZone == localizations.zoneD) {
+        zone = 'D';
+      }
+    }
+
+    // Check if filters will return results
+    try {
+      final aiApiService = AiApiService();
+      final response = await aiApiService.getIncidentsWithFilters(
+        startDate: startDate,
+        endDate: endDate,
+        zone: zone,
+      );
+
+      final incidents = response['incidents'] as List?;
+      final hasResults = incidents != null && incidents.isNotEmpty;
+
+      if (hasResults) {
+        // Apply filters to current screen
+        setState(() {
+          _activeFilters = {
+            'startDate': startDate,
+            'endDate': endDate,
+            'zone': zone,
+            'originalData': filterData,
+          };
+        });
+      } else {
+        // Navigate to filtered report screen (no data found)
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FilteredReportScreen(
+                reportTitle: widget.reportTitle,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // On error, still apply filters to show loading/error states
+      setState(() {
+        _activeFilters = {
+          'startDate': startDate,
+          'endDate': endDate,
+          'zone': zone,
+          'originalData': filterData,
+        };
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final localizations = AppLocalizations.of(context)!;
+    _selectedPeriod = localizations.daily;
   }
 
   @override
@@ -63,14 +167,18 @@ class _DetailedReportScreenState extends State<DetailedReportScreen> {
                 BlendMode.srcIn,
               ),
             ),
-            onPressed: () {
-              showModalBottomSheet(
+            onPressed: () async {
+              final filterData = await showModalBottomSheet<Map<String, dynamic>>(
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
                 builder: (context) =>
                     FilterEventsPopup(reportTitle: widget.reportTitle),
               );
+
+              if (filterData != null) {
+                _handleFilterData(filterData);
+              }
             },
           ),
         ],
@@ -91,12 +199,14 @@ class _DetailedReportScreenState extends State<DetailedReportScreen> {
             ReportSummaryCards(
               selectedPeriod: _selectedPeriod,
               reportType: widget.reportTitle,
+              filters: _activeFilters,
             ),
 
             // Incidents List
             ReportIncidentsList(
               selectedPeriod: _selectedPeriod,
               reportType: widget.reportTitle,
+              filters: _activeFilters,
             ),
 
             // Export Button

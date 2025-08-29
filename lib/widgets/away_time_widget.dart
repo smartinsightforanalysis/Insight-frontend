@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class AwayTimeWidget extends StatelessWidget {
   final String title;
   final String description;
   final String duration;
   final String additionalInfo;
+  final String? zoneAbsenceMessage;
+  final String? zoneName;
+  final bool isLoadingZoneAbsence;
+  final String? zoneAbsenceError;
 
   const AwayTimeWidget({
     Key? key,
@@ -13,10 +18,16 @@ class AwayTimeWidget extends StatelessWidget {
     required this.description,
     required this.duration,
     required this.additionalInfo,
+    this.zoneAbsenceMessage,
+    this.zoneName,
+    this.isLoadingZoneAbsence = false,
+    this.zoneAbsenceError,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
@@ -85,9 +96,9 @@ class AwayTimeWidget extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            const Text(
-                              'Zone Absence',
-                              style: TextStyle(
+                            Text(
+                              localizations.zoneAbsence,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF1C3557),
@@ -95,9 +106,9 @@ class AwayTimeWidget extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const Text(
-                          'Yesterday',
-                          style: TextStyle(
+                        Text(
+                          localizations.yesterday,
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF6B7280),
                           ),
@@ -110,13 +121,7 @@ class AwayTimeWidget extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            description,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF4B5563),
-                            ),
-                          ),
+                          _buildZoneAbsenceDescription(),
                           const SizedBox(height: 8),
                           Row(
                             children: [
@@ -127,13 +132,7 @@ class AwayTimeWidget extends StatelessWidget {
                                 height: 14,
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                'Zone: Service Area',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
+                              _buildZoneDisplay(localizations),
                             ],
                           ),
                         ],
@@ -144,18 +143,80 @@ class AwayTimeWidget extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          
-          // Additional info
-          // Text(
-          //   additionalInfo,
-          //   style: const TextStyle(
-          //     fontSize: 12,
-          //     color: Color(0xFF6B7280),
-          //   ),
-          // ),
-          // const SizedBox(height: 8),
         ],
+      ),
+    );
+  }
+
+  Widget _buildZoneAbsenceDescription() {
+    if (isLoadingZoneAbsence) {
+      return const Row(
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Color(0xFF16A3AC),
+            ),
+          ),
+          SizedBox(width: 8),
+          Text(
+            'Loading zone absence data...',
+            style: TextStyle(
+              fontSize: 14,
+              color: Color(0xFF6B7280),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (zoneAbsenceError != null || zoneAbsenceMessage == null) {
+      return Text(
+        description, // fallback to original description
+        style: const TextStyle(
+          fontSize: 14,
+          color: Color(0xFF4B5563),
+        ),
+      );
+    }
+
+    return Text(
+      zoneAbsenceMessage!,
+      style: const TextStyle(
+        fontSize: 14,
+        color: Color(0xFF4B5563),
+      ),
+    );
+  }
+
+  Widget _buildZoneDisplay(AppLocalizations localizations) {
+    if (isLoadingZoneAbsence) {
+      return const Text(
+        'Loading...',
+        style: TextStyle(
+          fontSize: 12,
+          color: Color(0xFF6B7280),
+        ),
+      );
+    }
+
+    if (zoneAbsenceError != null || zoneName == null) {
+      return Text(
+        '${localizations.zone}: ${localizations.serviceArea}', // fallback to original
+        style: const TextStyle(
+          fontSize: 12,
+          color: Color(0xFF6B7280),
+        ),
+      );
+    }
+
+    return Text(
+      '${localizations.zone}: $zoneName',
+      style: const TextStyle(
+        fontSize: 12,
+        color: Color(0xFF6B7280),
       ),
     );
   }

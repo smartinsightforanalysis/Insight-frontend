@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:insight/view/download_progress_screen.dart';
+import 'package:insight/l10n/app_localizations.dart';
+import 'package:insight/view/analytics_download_progress_screen.dart';
+import 'package:insight/view/employee_download_progress_screen.dart';
 
 class DownloadReportWidget extends StatefulWidget {
-  const DownloadReportWidget({Key? key}) : super(key: key);
+  final String? customButtonText;
+  final String? employeeName; // Add employee name parameter
+
+  const DownloadReportWidget({
+    super.key,
+    this.customButtonText,
+    this.employeeName,
+  });
 
   @override
   State<DownloadReportWidget> createState() => _DownloadReportWidgetState();
@@ -15,6 +24,8 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
@@ -32,18 +43,18 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Download Report',
-            style: TextStyle(
+          Text(
+            localizations.downloadReport,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Color(0xFF1C3557),
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Export the detailed report in PDF format',
-            style: TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
+          Text(
+            localizations.exportDetailedReportPdf,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
           ),
           const SizedBox(height: 16),
 
@@ -51,9 +62,9 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Include AI Insights',
-                style: TextStyle(fontSize: 14, color: Colors.black),
+              Text(
+                localizations.includeAiInsights,
+                style: const TextStyle(fontSize: 14, color: Colors.black),
               ),
               Switch(
                 value: _includeAnalytics,
@@ -66,7 +77,7 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
                 inactiveThumbColor: const Color(0xFF9CA3AF),
                 inactiveTrackColor: const Color(0xFFE5E7EB),
                 activeTrackColor: const Color(0xFFB0D9D9),
-                trackOutlineWidth: MaterialStateProperty.all(0.0),
+                trackOutlineWidth: WidgetStateProperty.all(0.0),
               ),
             ],
           ),
@@ -75,9 +86,9 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Include Snapshots',
-                style: TextStyle(fontSize: 14, color: Colors.black),
+              Text(
+                localizations.includeSnapshots,
+                style: const TextStyle(fontSize: 14, color: Colors.black),
               ),
               Switch(
                 value: _includeSnapshots,
@@ -90,7 +101,7 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
                 inactiveThumbColor: const Color(0xFF9CA3AF),
                 inactiveTrackColor: const Color(0xFFE5E7EB),
                 activeTrackColor: const Color(0xFFB0D9D9),
-                trackOutlineWidth: MaterialStateProperty.all(0.0),
+                trackOutlineWidth: WidgetStateProperty.all(0.0),
               ),
             ],
           ),
@@ -101,11 +112,28 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const DownloadProgressScreen(),
-                  ),
-                );
+                if (widget.employeeName != null) {
+                  // Navigate to employee-specific download screen
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => EmployeeDownloadProgressScreen(
+                        employeeName: widget.employeeName!,
+                        includeAiInsights: _includeAnalytics,
+                        includeSnapshots: _includeSnapshots,
+                      ),
+                    ),
+                  );
+                } else {
+                  // Navigate to analytics download screen (default behavior)
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => AnalyticsDownloadProgressScreen(
+                        includeAiInsights: _includeAnalytics,
+                        includeSnapshots: _includeSnapshots,
+                      ),
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF16A3AC),
@@ -129,9 +157,9 @@ class _DownloadReportWidgetState extends State<DownloadReportWidget> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Download Employee Summary',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  Text(
+                    widget.customButtonText ?? localizations.downloadEmployeeSummary,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),

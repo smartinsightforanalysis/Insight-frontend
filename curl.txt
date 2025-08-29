@@ -1,0 +1,165 @@
+# **Analytics Report URLs**
+
+## 🔧 **Analytics PDF Export Endpoints**
+
+### **1. Default Analytics Report (AI Insights enabled, Snapshots disabled)**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf" \
+  -H "accept: application/json"
+```
+
+### **2. Analytics Report with AI Insights Only**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_ai_insights=true" \
+  -H "accept: application/json"
+```
+
+### **3. Analytics Report with Snapshots Only**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_snapshots=true" \
+  -H "accept: application/json"
+```
+
+### **4. Analytics Report with Both Filters Enabled**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_ai_insights=true&include_snapshots=true" \
+  -H "accept: application/json"
+```
+
+### **5. Analytics Report with AI Insights Disabled**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_ai_insights=false" \
+  -H "accept: application/json"
+```
+
+### **6. Analytics Report with Snapshots Disabled**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_snapshots=false" \
+  -H "accept: application/json"
+```
+
+### **7. Analytics Report with Both Filters Disabled**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_ai_insights=false&include_snapshots=false" \
+  -H "accept: application/json"
+```
+
+## 📋 **Parameter Details**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `include_ai_insights` | `true` | Include AI insights, predictive analytics, behavior trends |
+| `include_snapshots` | `false` | Include detection images/snapshots from violation directories |
+
+## 🖼️ **Snapshot Sources**
+
+When `include_snapshots=true`, the report includes images from these detection directories:
+
+- **`logs/ppe_detections/`** - PPE violation images
+- **`logs/smoking_detections/`** - Smoking violation images  
+- **`logs/fight_detections/`** - Fight detection images
+- **`logs/phone_detections/`** - Phone use violation images
+- **`logs/handwashing_detections/`** - Handwashing detection images
+
+## 📊 **AI Insights Included**
+
+When `include_ai_insights=true`, the report includes:
+
+- **Predictive Insights**: Productivity trends, risk alerts
+- **Behavior Trends**: Safety compliance, attendance rate trends  
+- **Compliance Metrics**: Overall compliance scores, safety scores
+- **Summary Statistics**: Total insights count, trend analysis count
+
+## ✅ **Response Format**
+
+```json
+{
+  "filename": "analytics_report_20250801_170159.pdf",
+  "download_url": "/api/reports/analytics/download/analytics_report_20250801_170159.pdf",
+  "file_size": "1.0MB",
+  "generated_at": "2025-08-01T17:01:59.123456",
+  "expires_at": "2025-08-02T17:01:59.123456",
+  "status": "ready",
+  "filters_applied": {
+    "include_ai_insights": true,
+    "include_snapshots": false
+  },
+  "analytics_summary": {
+    "total_events": 25,
+    "ai_insights_included": true,
+    "snapshots_included": false,
+    "ai_insights_count": 2,
+    "snapshots_count": 0
+  },
+  "analytics_data": {
+    "generated_at": "2025-08-01T17:01:59.123456",
+    "summary": {
+      "total_events": 25,
+      "incident_events": 10,
+      "behavior_events": 8,
+      "away_time_events": 7,
+      "frame_snapshots": 0
+    },
+    "events": {
+      "Incident Events": 10,
+      "Behavior Events": 8,
+      "Away Time Events": 7
+    },
+    "ai_insights": {
+      "predictive_insights": {
+        "insights": [
+          {"type": "productivity_trend", "message": "Productivity expected to improve by 15% next week"},
+          {"type": "risk_alert", "message": "Zone A shows increased violation patterns"}
+        ]
+      },
+      "behavior_trends": {
+        "trends": [
+          {"metric": "safety_compliance", "trend": "improving", "change": "+12%"},
+          {"metric": "attendance_rate", "trend": "stable", "change": "+2%"}
+        ]
+      },
+      "compliance_metrics": {
+        "overall_compliance": 87.5,
+        "safety_score": 92.3,
+        "attendance_rate": 89.1
+      }
+    },
+    "frame_snapshots": [],
+    "filters_applied": {
+      "include_ai_insights": true,
+      "include_snapshots": false
+    }
+  },
+  "message": "Analytics report PDF generated successfully"
+}
+```
+
+## 🚀 **Testing Examples**
+
+### **Test with AI Insights Only**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_ai_insights=true&include_snapshots=false" \
+  -H "accept: application/json"
+```
+
+### **Test with Snapshots Only**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_ai_insights=false&include_snapshots=true" \
+  -H "accept: application/json"
+```
+
+### **Test with Both Enabled**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_ai_insights=true&include_snapshots=true" \
+  -H "accept: application/json"
+```
+
+### **Test with Both Disabled**
+```bash
+curl -X GET "https://f701919c23aa.ngrok-free.app/api/reports/analytics/export-pdf?include_ai_insights=false&include_snapshots=false" \
+  -H "accept: application/json"
+```
+
+---
+
+**Note**: The snapshots are taken from **detection images** (violation screenshots), not from violation logs! 📸 

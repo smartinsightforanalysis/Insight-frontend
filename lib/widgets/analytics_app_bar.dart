@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class AnalyticsAppBar extends StatelessWidget {
   @override
@@ -24,19 +25,19 @@ class AnalyticsAppBar extends StatelessWidget {
           const SizedBox(width: 4),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                'Analytics',
-                style: TextStyle(
+                AppLocalizations.of(context)!.analytics,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
-                'Last 24 hours activity breakdown',
-                style: TextStyle(
+                AppLocalizations.of(context)!.last24HoursActivity,
+                style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF6B7280),
                 ),

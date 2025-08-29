@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import '../services/ai_api_service.dart';
 
 class SimplePerformanceChart extends StatefulWidget {
   final String title;
   final List<int> data;
+  final String? employeeName;
 
   const SimplePerformanceChart({
     Key? key,
     required this.title,
     required this.data,
+    this.employeeName,
   }) : super(key: key);
 
   @override
@@ -15,7 +18,70 @@ class SimplePerformanceChart extends StatefulWidget {
 }
 
 class _SimplePerformanceChartState extends State<SimplePerformanceChart> {
+  final AiApiService _aiApiService = AiApiService();
   int _selectedIndex = 0; // 0: D, 1: W, 2: M
+  List<int> _apiData = [];
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.employeeName != null) {
+      _loadPerformanceData();
+    }
+  }
+
+  Future<void> _loadPerformanceData() async {
+    if (widget.employeeName == null) return;
+
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      final period = _selectedIndex == 0 ? '7d' : _selectedIndex == 1 ? '30d' : '90d';
+
+      final response = await _aiApiService.getEmployeePerformanceChart(
+        employeeName: widget.employeeName!,
+        chartType: 'bar',
+        period: period,
+      );
+
+      if (response['data'] != null && response['data'] is List) {
+        final data = List<Map<String, dynamic>>.from(response['data']);
+        final chartData = data.map((item) {
+          // Use compliance_score as the main performance metric
+          final score = item['compliance_score'] ?? 0;
+          return (score is num) ? score.round().clamp(0, 100) : 0;
+        }).toList();
+
+        setState(() {
+          _apiData = chartData.isNotEmpty ? chartData : [0, 0, 0, 0, 0, 0, 0];
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _apiData = [0, 0, 0, 0, 0, 0, 0]; // Fallback data
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load performance data';
+        _apiData = [0, 0, 0, 0, 0, 0, 0]; // Fallback data
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<int> get _currentData {
+    if (widget.employeeName != null && _apiData.isNotEmpty) {
+      return _apiData;
+    }
+    return widget.data; // Fallback to provided data
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,15 +217,15 @@ class _SimplePerformanceChartState extends State<SimplePerformanceChart> {
                       ),
                       
                       // Bars - each positioned individually to start from the 0 horizontal line
-                      ...List.generate(widget.data.length, (i) {
+                      ...List.generate(_currentData.length, (i) {
                         // Calculate bar height as percentage of available space above 0 line
                         // Available space from 0 line to top: 126px (0 line is at 126px from top)
                         // Scale data value (0-100) to fit this space
-                        final double barHeight = (widget.data[i] / 100.0) * 126.0;
+                        final double barHeight = (_currentData[i] / 100.0) * 126.0;
 
                         // Calculate horizontal position for each bar
                         final double totalWidth = MediaQuery.of(context).size.width - 32 - 40 - 8; // Subtract padding and Y-axis width
-                        final double barSpacing = totalWidth / widget.data.length;
+                        final double barSpacing = totalWidth / _currentData.length;
                         final double leftPosition = (i * barSpacing) + (barSpacing / 2) - 8; // Center each bar in its space
 
                         return Positioned(
@@ -197,6 +263,9 @@ class _SimplePerformanceChartState extends State<SimplePerformanceChart> {
         setState(() {
           _selectedIndex = idx;
         });
+        if (widget.employeeName != null) {
+          _loadPerformanceData();
+        }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),

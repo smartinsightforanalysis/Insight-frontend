@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../services/api_service.dart';
+import '../l10n/app_localizations.dart';
 
 class BranchSwitchPopup extends StatefulWidget {
   final String? currentBranchId;
   final Function(Map<String, dynamic>)? onBranchSelected;
-  
+
   const BranchSwitchPopup({
     Key? key,
     this.currentBranchId,
@@ -19,7 +20,7 @@ class BranchSwitchPopup extends StatefulWidget {
 class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
-  
+
   List<Map<String, dynamic>> _branches = [];
   List<Map<String, dynamic>> _filteredBranches = [];
   bool _isLoading = true;
@@ -88,16 +89,19 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
         (branch) => (branch['id'] ?? branch['_id']) == _selectedBranchId,
         orElse: () => {},
       );
-      
+
       if (selectedBranch.isNotEmpty && widget.onBranchSelected != null) {
         widget.onBranchSelected!(selectedBranch);
       }
-      
+
       Navigator.pop(context, selectedBranch.isNotEmpty ? selectedBranch : null);
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.7, // 60% of screen height
       decoration: const BoxDecoration(
@@ -114,8 +118,8 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Switch Branch',
+                Text(
+                  localizations?.switchBranch ?? 'Switch Branch',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -136,8 +140,8 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Search Branch',
+                Text(
+                  localizations?.searchBranch ?? 'Search Branch',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -148,7 +152,8 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search branches...',
+                    hintText:
+                        localizations?.searchBranches ?? 'Search branches...',
                     hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
                     prefixIcon: Container(
                       width: 20,
@@ -159,7 +164,10 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                         width: 20,
                         height: 20,
                         fit: BoxFit.contain,
-                        colorFilter: const ColorFilter.mode(Color(0xFF9CA3AF), BlendMode.srcIn),
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFF9CA3AF),
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                     border: OutlineInputBorder(
@@ -178,93 +186,94 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF209A9F),
-                    ),
+                    child: CircularProgressIndicator(color: Color(0xFF209A9F)),
                   )
                 : _errorMessage != null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 48,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Error: $_errorMessage',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: _loadBranches,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF209A9F),
-                              ),
-                              child: const Text(
-                                'Retry',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.grey[400],
                         ),
-                      )
-                    : _filteredBranches.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.business_outlined,
-                                  size: 48,
-                                  color: Colors.grey[400],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  _searchController.text.isNotEmpty
-                                      ? 'No branches found'
-                                      : 'No branches available',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                if (_searchController.text.isNotEmpty)
-                                  const SizedBox(height: 8),
-                                if (_searchController.text.isNotEmpty)
-                                  const Text(
-                                    'Try a different search term',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _filteredBranches.length,
-                            itemBuilder: (context, index) {
-                              final branch = _filteredBranches[index];
-                              final branchId = branch['id'] ?? branch['_id'];
-                              final isSelected = _selectedBranchId == branchId;
-                              
-                              return _buildBranchItem(
-                                context,
-                                branch['branchName'] ?? 'Unknown Branch',
-                                branch['branchAddress'] ?? 'Unknown Address',
-                                isSelected,
-                                () => _selectBranch(branch),
-                              );
-                            },
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error: $_errorMessage',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
                           ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadBranches,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF209A9F),
+                          ),
+                          child: Text(
+                            localizations?.retry ?? 'Retry',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : _filteredBranches.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.business_outlined,
+                          size: 48,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _searchController.text.isNotEmpty
+                              ? (localizations?.noBranchesFound ??
+                                    'No branches found')
+                              : (localizations?.noBranchesAvailable ??
+                                    'No branches available'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        if (_searchController.text.isNotEmpty)
+                          const SizedBox(height: 8),
+                        if (_searchController.text.isNotEmpty)
+                          Text(
+                            localizations?.tryDifferentSearchTerm ??
+                                'Try a different search term',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _filteredBranches.length,
+                    itemBuilder: (context, index) {
+                      final branch = _filteredBranches[index];
+                      final branchId = branch['id'] ?? branch['_id'];
+                      final isSelected = _selectedBranchId == branchId;
+
+                      return _buildBranchItem(
+                        context,
+                        branch['branchName'] ??
+                            (localizations?.unknownBranch ?? 'Unknown Branch'),
+                        branch['branchAddress'] ??
+                            (localizations?.unknownAddress ??
+                                'Unknown Address'),
+                        isSelected,
+                        () => _selectBranch(branch),
+                      );
+                    },
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -279,8 +288,8 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                child: const Text(
-                  'Switch Branch',
+                child: Text(
+                  localizations?.switchBranch ?? 'Switch Branch',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
@@ -304,7 +313,9 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF209A9F).withOpacity(0.1) : Colors.transparent,
+          color: isSelected
+              ? const Color(0xFF209A9F).withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8.0),
           border: isSelected
               ? Border.all(color: const Color(0xFF209A9F), width: 1.5)
@@ -320,7 +331,9 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                 width: 17,
                 height: 16,
                 colorFilter: ColorFilter.mode(
-                  isSelected ? const Color(0xFF209A9F) : const Color(0xFF9CA3AF),
+                  isSelected
+                      ? const Color(0xFF209A9F)
+                      : const Color(0xFF9CA3AF),
                   BlendMode.srcIn,
                 ),
               ),
@@ -335,7 +348,9 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: isSelected ? const Color(0xFF209A9F) : const Color(0xFF333333),
+                      color: isSelected
+                          ? const Color(0xFF209A9F)
+                          : const Color(0xFF333333),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -360,4 +375,4 @@ class _BranchSwitchPopupState extends State<BranchSwitchPopup> {
       ),
     );
   }
-} 
+}

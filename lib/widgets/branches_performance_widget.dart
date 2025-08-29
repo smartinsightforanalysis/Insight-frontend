@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:insight/l10n/app_localizations.dart';
 
 class BranchesPerformanceWidget extends StatelessWidget {
-  const BranchesPerformanceWidget({Key? key}) : super(key: key);
+  final List<Map<String, dynamic>> branches;
+  final bool isLoading;
+
+  const BranchesPerformanceWidget({
+    Key? key,
+    this.branches = const [],
+    this.isLoading = false,
+  }) : super(key: key);
+
+  // Define colors for different branches
+  static const List<Color> _branchColors = [
+    Color(0xFF1E3A8A), // Dark blue
+    Color(0xFF60A5FA), // Light blue
+    Color(0xFFCBD5E1), // Light gray
+    Color(0xFF9FD6A3), // Light green
+    Color(0xFFE879F9), // Pink
+    Color(0xFFFBBF24), // Yellow
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -10,72 +28,122 @@ class BranchesPerformanceWidget extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: const Text(
-            'Branches Performance',
+          child: Text(
+            AppLocalizations.of(context)?.branchesPerformance ??
+                'Branches Performance',
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
               color: Color(0xFF1C3557),
             ),
           ),
         ),
         const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Branch A', 
-          'Downtown', 
-          88, 
-          const Color(0xFF1E3A8A),
-          0.9
-        ),
-        const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Branch B', 
-          'Central', 
-          84, 
-          const Color(0xFF60A5FA),
-          0.85
-        ),
-        const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Branch C', 
-          'Zone 2', 
-          82, 
-          const Color(0xFFCBD5E1),
-          0.82
-        ),
-        const SizedBox(height: 8),
-        _buildEmployeeCard(
-          'Branch D', 
-          'Zone 4', 
-          79, 
-          const Color(0xFF9FD6A3),
-          0.78
-        ),
+        if (isLoading)
+          _buildLoadingState()
+        else if (branches.isEmpty)
+          _buildEmptyState()
+        else
+          ..._buildBranchCards(),
       ],
     );
   }
 
-  Widget _buildEmployeeCard(
-      String name,
-      String location,
-      int score,
-      Color progressColor,
-      double progressValue) {
+  Widget _buildLoadingState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+      child: Center(child: CircularProgressIndicator(color: Color(0xFF16A3AC))),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+      child: Center(
+        child: Text(
+          'No branch data available',
+          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildBranchCards() {
+    List<Widget> cards = [];
+
+    for (int i = 0; i < branches.length; i++) {
+      final branch = branches[i];
+      final branchName = branch['branch']?.toString() ?? 'Unknown Branch';
+      final productivityScore = (branch['productivity_score'] ?? 0.0)
+          .toDouble();
+      final scorePercentage = (productivityScore * 100).round().clamp(0, 100);
+      final progressValue = productivityScore.clamp(0.0, 1.0);
+
+      // Use different colors for each branch
+      final color = _branchColors[i % _branchColors.length];
+
+      // Generate a location based on branch name (you can enhance this with real location data)
+      final location = _generateLocationName(branchName);
+
+      cards.add(
+        _buildBranchCard(
+          'Branch $branchName',
+          location,
+          scorePercentage,
+          color,
+          progressValue,
+        ),
+      );
+
+      if (i < branches.length - 1) {
+        cards.add(const SizedBox(height: 8));
+      }
+    }
+
+    return cards;
+  }
+
+  String _generateLocationName(String branchName) {
+    // Simple mapping for demo purposes - you can enhance this with real location data
+    switch (branchName.toUpperCase()) {
+      case 'A':
+        return 'Downtown';
+      case 'B':
+        return 'Central';
+      case 'C':
+        return 'Zone 2';
+      case 'D':
+        return 'Zone 4';
+      default:
+        return 'Zone ${branchName}';
+    }
+  }
+
+  Widget _buildBranchCard(
+    String name,
+    String location,
+    int score,
+    Color progressColor,
+    double progressValue,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
       elevation: 1,
       color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Circle avatar with solid color
+            // Branch placeholder
             CircleAvatar(
-              radius: 25,
-              backgroundColor: const Color(0xFFEAEAEA),
+              radius: 25, 
+              backgroundColor: progressColor.withOpacity(0.15),
+              child: Icon(
+                Icons.business,
+                color: progressColor,
+                size: 30,
+              ),
             ),
             const SizedBox(width: 16),
             // Name and location
@@ -158,4 +226,4 @@ class BranchesPerformanceWidget extends StatelessWidget {
       ),
     );
   }
-} 
+}
