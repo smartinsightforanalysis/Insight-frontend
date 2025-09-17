@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class AiApiService {
   // AI Monitoring System Base URL - separate from backend API
-  final String _aiBaseUrl = "https://aa2cc431cf5c.ngrok-free.app";
+  final String _aiBaseUrl = "https://7a7fcae57dc8.ngrok-free.app";
 
   // Default headers including the grok-skip-browser-warning
   Map<String, String> get _defaultHeaders => {
